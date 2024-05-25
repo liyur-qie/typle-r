@@ -9,13 +9,9 @@ export const metadata: Metadata = {
   description: "Typle, touch typing app, developed with Next.js",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body className={inter.className}>{children}</body>
     </html>
   );
