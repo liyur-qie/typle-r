@@ -1,16 +1,10 @@
 import Navbar from "@/components/Navbar/Navbar";
 import Sidebar from "@/components/Sidebar/Sidebar";
 
-export default function Home() {
+export default function Home({ children } : { children: React.ReactNode}) {
   return (
-    <div className="flex flex-wrap">
-      <Sidebar />
-      <div className="flex-auto">
-        <Navbar />
-        <main>
-          <p>Content</p>
-        </main>
-      </div>
+    <div>
+      { children }
     </div>
   );
 }
