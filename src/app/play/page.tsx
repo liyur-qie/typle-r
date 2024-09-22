@@ -103,7 +103,7 @@ export default function Play(){
             <h2 className="text-2xl">
               単語リスト
             </h2>
-            <TableContainer component={Paper}>
+            <TableContainer>
               <Table aria-label="simple table">
                 <TableHead>
                   <TableRow>
@@ -118,8 +118,8 @@ export default function Play(){
                       key={row.name}
                     >
                       <TableCell component="th" scope="row">{ row.name }</TableCell>
-                      <TableCell align="right"> { row.length } 単語</TableCell>
-                      <TableCell align="right"> {row.action } </TableCell>
+                      <TableCell> { row.length } 単語</TableCell>
+                      <TableCell> {row.action } </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
