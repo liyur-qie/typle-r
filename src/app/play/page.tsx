@@ -30,7 +30,15 @@ export default function Play(){
     }
   }, [wordLists, wordList, wordListName])
 
-  function createData(
+  function createWordListRecordsRowsData(
+    index: number,
+    time: number,
+    date: string,
+  ) {
+    return { index, time, date };
+  }
+
+  function createWordListsRowsData(
     name: string,
     length: number,
     action: React.ReactNode,
@@ -38,8 +46,11 @@ export default function Play(){
     return { name, length, action };
   }
   
-  const rows = wordLists.map((wordList, index) => (
-    createData(wordList.name, wordList.words.length, <Button variant="outlined">選択</Button>)
+  const wordListRecordsRows = wordList ? wordList.records.map((record, index) => (
+    createWordListRecordsRowsData(index, record.time, record.date)
+  )) : []
+  const wordListsRows = wordLists.map((wordList, index) => (
+    createWordListsRowsData(wordList.name, wordList.words.length, <Button variant="outlined">選択</Button>)
   ))
 
   return (
@@ -69,32 +80,30 @@ export default function Play(){
         <section className="mt-8 flex flex-wrap justify-between">
           <section id="rankings" className="lg:w-6/12 md:w-full">
             <h2 className="text-2xl">
-              記録
+              練習記録
             </h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>No.</th>
-                  <th>所要時間</th>
-                  <th>プレイ日時</th>
-                </tr>
-              </thead>
-              <tbody>
-                { 
-                  wordList?.records.map((record, index) => (
-                    <tr key={ index }>
-                      <td className="text-center">
-                        { index + 1 }
-                      </td>
-                      <td>
-                        { record.time } 秒
-                      </td>
-                      <td>{ record.date}</td>
-                    </tr>
-                  ))
-                }
-              </tbody>
-            </table>
+            <TableContainer>
+              <Table aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>No.</TableCell>
+                    <TableCell>所要時間</TableCell>
+                    <TableCell>プレイ日時</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  { wordListRecordsRows.map((row, index) => (
+                    <TableRow
+                      key={index}
+                    >
+                      <TableCell component="th" scope="row">{ index + 1 }</TableCell>
+                      <TableCell> { row.time } 秒</TableCell>
+                      <TableCell> {row.date } </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </section>
           <section
             id="selectWordList"
@@ -113,7 +122,7 @@ export default function Play(){
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
+                  {wordListsRows.map((row) => (
                     <TableRow
                       key={row.name}
                     >
