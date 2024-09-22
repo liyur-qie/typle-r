@@ -2,7 +2,7 @@ import NavbarListItem from "./NavbarListItem"
 
 export default function NavbarList(){
   const routes = [
-    { title: "ガイド", path: "/docs" },
+    { title: "ガイド", path: "/guide" },
     { title: "GitHub", path: "/github" },
   ]
 
