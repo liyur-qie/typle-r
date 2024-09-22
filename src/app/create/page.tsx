@@ -21,11 +21,11 @@ export default function Create(){
           </thead>
           <tbody>
             <tr>
-              <td>A</td>
+              <td>1</td>
               <td>
-                <input type="text" />
+                hoge
               </td>
-              <td>N 文字</td>
+              <td>4文字</td>
               <td>
                 <button>上へ</button>
                 <button>下へ</button>
@@ -33,12 +33,13 @@ export default function Create(){
               </td>
             </tr>
             <tr>
-              <td>1</td>
+              <td>2</td>
               <td>
-                <input type="text" />
+                <input type="text" placeholder="ここに新規単語を入力"/>
               </td>
               <td>N 文字</td>
               <td>
+                <button>追加</button>
               </td>
             </tr>
           </tbody>
