@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "typle-r",
-  description: "Typle, touch typing app, developed with Next.js",
+  description: "Typle enables you to improve your typing skills",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
