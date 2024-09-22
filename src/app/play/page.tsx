@@ -1,4 +1,27 @@
+"use client"
+
+import { useEffect, useReducer, useState } from "react"
+import WordListsResponse from "@/json/WordListsResponse.json"
+import type { WordList } from "@/types/WordList"
+import Button from "@mui/material/Button"
+
 export default function Play(){
+  const [wordLists, setWordLists] = useState<WordList[]>([])
+  const [wordList, setWordList] = useState<WordList>()
+  const [wordListName, setWordListName] = useState<string>("")
+  const [displayWord, setDisplayWord] = useState<string>("")
+  const [inputValue, setInputValue] = useState<string>("")
+
+  useEffect(() => {
+    setWordLists(WordListsResponse)
+    setWordList(wordLists[0])
+
+    if(wordList) {
+      setWordListName(wordList.name)
+      setDisplayWord(wordList.words[0].display)
+    }
+  }, [wordLists, wordList, wordListName])
+
   return (
     <main className="bg-white pb-12">
       <section id="playArea">
@@ -6,19 +29,21 @@ export default function Play(){
           id="wordDisplay"
           className="bg-gray-900 text-white flex justify-center items-center text-4xl h-28"
         >
-          入力を期待する単語
+          { displayWord }
         </div>
         <input
           id="wordInputField"
-          v-model="wordInputField"
+          value={inputValue}
+          onChange={ e => setInputValue(e.target.value) }
           type="text"
           className="bg-gray-800 text-white text-center w-full text-2xl font-light h-28 outline-none"
           placeholder="Type the word above here"
         />
+        { inputValue }
       </section>
       <div className="mx-auto mt-8 px-6">
         <section id="wordList">
-          <h1 className="text-xl my-3">選択中: 選択中の単語リスト名</h1>
+          <h1 className="text-xl my-3">選択中: { wordListName }</h1>
           <p>チップ表示エリア</p>
         </section>
         <section className="mt-8 flex flex-wrap justify-between">
@@ -35,15 +60,19 @@ export default function Play(){
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="text-center">
-                    1
-                  </td>
-                  <td>
-                    N 秒
-                  </td>
-                  <td>{ new Date().toLocaleString() }</td>
-                </tr>
+                { 
+                  wordList?.records.map((record, index) => (
+                    <tr key={ index }>
+                      <td className="text-center">
+                        { index + 1 }
+                      </td>
+                      <td>
+                        { record.time } 秒
+                      </td>
+                      <td>{ record.date}</td>
+                    </tr>
+                  ))
+                }
               </tbody>
             </table>
           </section>
@@ -57,32 +86,23 @@ export default function Play(){
             <table>
               <thead>
                 <tr>
-                  <th>単語リスト</th>
+                  <th>単語リスト名</th>
                   <th>単語数</th>
                   <th>選択</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>
-                    単語リストA
-                  </td>
-                  <td>N 語</td>
-                  <td>
-                    <button>
-                      選択済み
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>単語リストB</td>
-                  <td>N 語</td>
-                  <td>
-                    <button>
-                      プレイ
-                    </button>
-                  </td>
-                </tr>
+                {
+                  wordLists.map((wordList, index) => (
+                    <tr key={ index }>
+                      <td>{ wordList.name }</td>
+                      <td>{ wordList.words.length }</td>
+                      <td>
+                        <Button>プレイ</Button>
+                      </td>
+                    </tr>
+                  ))
+                }
               </tbody>
             </table>
           </section>
