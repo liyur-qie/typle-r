@@ -4,6 +4,14 @@ import { useEffect, useReducer, useState } from "react"
 import WordListsResponse from "@/json/WordListsResponse.json"
 import type { WordList } from "@/types/WordList"
 import Button from "@mui/material/Button"
+import * as React from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 export default function Play(){
   const [wordLists, setWordLists] = useState<WordList[]>([])
@@ -21,6 +29,18 @@ export default function Play(){
       setDisplayWord(wordList.words[0].display)
     }
   }, [wordLists, wordList, wordListName])
+
+  function createData(
+    name: string,
+    length: number,
+    action: React.ReactNode,
+  ) {
+    return { name, length, action };
+  }
+  
+  const rows = wordLists.map((wordList, index) => (
+    createData(wordList.name, wordList.words.length, <Button variant="outlined">選択</Button>)
+  ))
 
   return (
     <main className="bg-white pb-12">
@@ -83,28 +103,28 @@ export default function Play(){
             <h2 className="text-2xl">
               単語リスト
             </h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>単語リスト名</th>
-                  <th>単語数</th>
-                  <th>選択</th>
-                </tr>
-              </thead>
-              <tbody>
-                {
-                  wordLists.map((wordList, index) => (
-                    <tr key={ index }>
-                      <td>{ wordList.name }</td>
-                      <td>{ wordList.words.length }</td>
-                      <td>
-                        <Button>プレイ</Button>
-                      </td>
-                    </tr>
-                  ))
-                }
-              </tbody>
-            </table>
+            <TableContainer component={Paper}>
+              <Table aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>単語リスト名</TableCell>
+                    <TableCell>単語数</TableCell>
+                    <TableCell>操作</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow
+                      key={row.name}
+                    >
+                      <TableCell component="th" scope="row">{ row.name }</TableCell>
+                      <TableCell align="right"> { row.length } 単語</TableCell>
+                      <TableCell align="right"> {row.action } </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </section>
         </section>
       </div>
