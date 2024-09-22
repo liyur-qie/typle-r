@@ -1,0 +1,46 @@
+{
+  "wordLists": [ 
+    {
+      "name": "Test 1",
+      "words": [
+        {
+          "display": "hoge",
+          "input": "hoge",
+          "annotation": ""
+        },
+        {
+          "display": "foo",
+          "input": "foo",
+          "annotation": ""
+        },
+        {
+          "display": "bar",
+          "input": "bar",
+          "annotation": ""
+        }
+      ],
+      "createdAt": "2024/09/22 10:00"
+    },
+    {
+      "name": "Test 2",
+      "words": [
+        {
+          "display": "one",
+          "input": "one",
+          "annotation": ""
+        },
+        {
+          "display": "two",
+          "input": "two",
+          "annotation": ""
+        },
+        {
+          "display": "three",
+          "input": "three",
+          "annotation": ""
+        }
+      ],
+      "createdAt": "2024/09/22 11:00"
+    }
+  ]
+}
