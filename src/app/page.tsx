@@ -1,10 +1,7 @@
-import Navbar from "@/components/Navbar/Navbar";
-import Sidebar from "@/components/Sidebar/Sidebar";
+import type { ReactNode } from "react"
 
-export default function Home({ children } : { children: React.ReactNode}) {
+export default function Home() {
   return (
-    <div>
-      { children }
-    </div>
+    <div>Home</div>
   );
 }
