@@ -1,7 +1,29 @@
+"use client"
+
 import PageTitle from "@/components/PageTitle/PageTitle"
 import PageDescription from "@/components/PageDescription/PageDescription"
 
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Button from "@mui/material/Button"
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ClearIcon from '@mui/icons-material/Clear';
+
+
+import type { WordList } from "@/types/WordList";
+import { useState } from "react";
+import TextField from "@mui/material/TextField";
+
 export default function Create(){
+  const [wordList, setWordList] = useState<WordList>()
+  const [wordListName, setWordListName] = useState("Example list")
+  const [words, setWords] = useState<string[]>(["yi", "er", "san"])
+
   return (
     <main className="bg-white p-16 pb-12">
       <section>
@@ -9,45 +31,45 @@ export default function Create(){
         <PageDescription>説明</PageDescription>
       </section>
       <section className="mt-8">
-        <input type="text"/>
-        <table>
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th className="w-4/12">単語</th>
-              <th>文字数</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>
-                hoge
-              </td>
-              <td>4文字</td>
-              <td>
-                <button>上へ</button>
-                <button>下へ</button>
-                <button>削除</button>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>
-                <input type="text" placeholder="ここに新規単語を入力"/>
-              </td>
-              <td>N 文字</td>
-              <td>
-                <button>追加</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <TextField label="新規単語リスト名" variant="filled" fullWidth value={wordListName} />
+        <TableContainer className="mt-4">
+          <Table aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>No.</TableCell>
+                <TableCell>単語</TableCell>
+                <TableCell>文字数</TableCell>
+                <TableCell>操作</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              { words.map((word, index) => (
+                <TableRow key={index}>
+                  <TableCell component="th" scope="row">{ index + 1 }</TableCell>
+                  <TableCell>
+                    <TextField variant="standard" value={ word } />
+                  </TableCell>
+                  <TableCell>{ word.length } 文字</TableCell>
+                  <TableCell>
+                    <Button variant="outlined" className="mr-2">
+                      <ArrowUpwardIcon />
+                    </Button>
+                    <Button variant="outlined" className="mr-2">
+                      <ArrowDownwardIcon />
+                    </Button>
+                    <Button variant="outlined">
+                      <ClearIcon />
+                    </Button>
+                  </TableCell>
+               </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </section>
       <section className="mt-8">
-        <button>作成</button>
-        <button>キャンセル</button>
+        <Button variant="outlined" className="mr-4">作成</Button>
+        <Button variant="outlined">キャンセル</Button>
       </section>
     </main>
   )
