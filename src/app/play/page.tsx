@@ -13,6 +13,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import PageContainer from "@/components/PageContainer/PageContainer"
 import Page from "@/components/Page/Page"
+import Stack from "@mui/material/Stack"
+import Chip from "@mui/material/Chip"
 
 export default function Play(){
   const [wordLists, setWordLists] = useState<WordList[]>([])
@@ -76,7 +78,13 @@ export default function Play(){
       <div className="mx-auto mt-8 px-6">
         <section id="wordList">
           <h1 className="text-xl my-3">選択中: { wordListName }</h1>
-          <p>チップ表示エリア</p>
+          <Stack direction="row" spacing={1}>
+            {
+              wordList?.words.map((word, index) => (
+                <Chip key={ index } label={ word.input } color="primary" variant="outlined" />
+              ))
+            }
+          </Stack>
         </section>
         <section className="mt-8 flex flex-wrap justify-between">
           <section id="rankings" className="lg:w-6/12 md:w-full">
