@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useReducer, useState } from "react"
+import { useEffect, useState } from "react"
 import WordListsResponse from "@/json/WordListsResponse.json"
 import type { WordList } from "@/types/WordList"
 import Button from "@mui/material/Button"
@@ -11,7 +11,8 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+import PageContainer from "@/components/PageContainer/PageContainer"
+import Page from "@/components/Page/Page"
 
 export default function Play(){
   const [wordLists, setWordLists] = useState<WordList[]>([])
@@ -54,7 +55,7 @@ export default function Play(){
   ))
 
   return (
-    <main className="bg-white pb-12 w-10/12 mx-auto mt-12">
+    <Page className="pb-12">
       <section id="playArea">
         <div
           id="wordDisplay"
@@ -137,6 +138,6 @@ export default function Play(){
           </section>
         </section>
       </div>
-    </main>
+    </Page>
   )
 }

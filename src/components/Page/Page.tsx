@@ -1,8 +1,8 @@
 import React from "react";
 
-export default function Page({ children } : { children: React.ReactNode }){
+export default function Page({ children, className } : { children: React.ReactNode, className?: any }){
   return (
-    <main className="w-10/12 mx-auto mt-12 bg-white p-16 pb-12">
+    <main className={ "w-10/12 mx-auto mt-12 max-w-7xl bg-white" + " " + className }>
       { children }
     </main>
   )

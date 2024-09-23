@@ -15,6 +15,7 @@ import Button from "@mui/material/Button"
 import { useEffect, useState } from "react";
 import { WordList } from "@/types/WordList";
 import Page from "@/components/Page/Page";
+import PageContainer from "@/components/PageContainer/PageContainer";
 
 export default function Edit(){
   const [wordLists, setWordLists] = useState<WordList[]>()
@@ -24,7 +25,8 @@ export default function Edit(){
   }, [])
   
   return (
-      <Page>
+    <Page>
+      <PageContainer>
         <PageTitle>編集</PageTitle>
         <PageDescription>説明</PageDescription>
         { wordLists?.map(wordList => (
@@ -56,6 +58,7 @@ export default function Edit(){
           </section>
           ))
         }
+      </PageContainer>
     </Page>
   )
 }

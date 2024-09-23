@@ -23,9 +23,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <Sidebar />
       <div className="flex-auto">
         <Navbar />
-        <PageContainer>
-          { children }
-        </PageContainer>
+        { children }
       </div>
     </div>
       </body>
