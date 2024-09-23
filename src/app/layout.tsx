@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@/scss/globals.scss";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar/Navbar";
+import PageContainer from "@/components/PageContainer/PageContainer";
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <Sidebar />
       <div className="flex-auto">
         <Navbar />
-        { children }
+        <PageContainer>
+          { children }
+        </PageContainer>
       </div>
     </div>
       </body>

@@ -5,6 +5,7 @@ import PageDescription from "@/components/PageDescription/PageDescription"
 import WordListsResponse from "@/json/WordListsResponse.json"
 import { useEffect, useState } from "react"
 import { WordList } from "@/types/WordList"
+import Page from "@/components/Page/Page"
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -22,7 +23,7 @@ export default function Records() {
   }, [])
 
   return (
-    <main className="bg-white p-16 pb-12">
+    <Page>
       <PageTitle>記録</PageTitle>
       <PageDescription>各単語リストの記録を確認することができます。</PageDescription>
       { wordLists?.map(wordList => (
@@ -57,6 +58,6 @@ export default function Records() {
         </section>
         ))
       }
-    </main>
+    </Page>
   )
 }

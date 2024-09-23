@@ -54,7 +54,7 @@ export default function Play(){
   ))
 
   return (
-    <main className="bg-white pb-12">
+    <main className="bg-white pb-12 w-10/12 mx-auto mt-12">
       <section id="playArea">
         <div
           id="wordDisplay"

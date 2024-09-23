@@ -18,6 +18,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import type { WordList } from "@/types/WordList";
 import { useState } from "react";
 import TextField from "@mui/material/TextField";
+import Page from "@/components/Page/Page";
 
 export default function Create(){
   const [wordList, setWordList] = useState<WordList>()
@@ -25,7 +26,7 @@ export default function Create(){
   const [words, setWords] = useState<string[]>(["yi", "er", "san"])
 
   return (
-    <main className="bg-white p-16 pb-12">
+    <Page>
       <section>
         <PageTitle>Create</PageTitle>
         <PageDescription>説明</PageDescription>
@@ -71,6 +72,6 @@ export default function Create(){
         <Button variant="outlined" className="mr-4">作成</Button>
         <Button variant="outlined">キャンセル</Button>
       </section>
-    </main>
+    </Page>
   )
 }
