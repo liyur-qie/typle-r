@@ -47,8 +47,8 @@ export default function Records() {
                         <TableRow key={ index }>
                           <TableCell component="th" scope="row">{ index + 1 }</TableCell>
                           <TableCell> { record.time } 秒</TableCell>
-                          <TableCell>{ wordList.words.length }</TableCell>
-                          <TableCell> { record.time } </TableCell>
+                          <TableCell>{ wordList.words.length } 単語</TableCell>
+                          <TableCell>{ record.date }</TableCell>
                           <TableCell>
                             <Button variant="outlined">削除</Button>
                           </TableCell>
