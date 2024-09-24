@@ -18,20 +18,14 @@ import Chip from "@mui/material/Chip"
 
 export default function Play(){
   const [wordLists, setWordLists] = useState<WordList[]>([])
-  const [wordList, setWordList] = useState<WordList>()
-  const [wordListName, setWordListName] = useState<string>("")
-  const [displayWord, setDisplayWord] = useState<string>("")
+  const [wordList, setWordList] = useState<WordList>(wordLists[0])
+  const [wordListName, setWordListName] = useState<string>(wordList && wordList.name)
+  const [displayWord, setDisplayWord] = useState<string>(wordList && wordList.words[0].display)
   const [inputValue, setInputValue] = useState<string>("")
 
   useEffect(() => {
     setWordLists(WordListsResponse)
-    setWordList(wordLists[0])
-
-    if(wordList) {
-      setWordListName(wordList.name)
-      setDisplayWord(wordList.words[0].display)
-    }
-  }, [wordLists, wordList, wordListName])
+  }, [])
 
   function createWordListRecordsRowsData(
     index: number,
@@ -55,6 +49,13 @@ export default function Play(){
   const wordListsRows = wordLists.map((wordList, index) => (
     createWordListsRowsData(wordList.name, wordList.words.length, <Button variant="outlined">選択</Button>)
   ))
+
+  const selectWordList = (wordListName: string) => {
+    const wordListIndex = wordLists.findIndex(wordList => wordList.name === wordListName)
+    setWordList(wordLists[wordListIndex])
+    setWordListName(wordListName)
+    setDisplayWord(wordList.words[0].display)
+  }
 
   return (
     <Page className="pb-12">
@@ -137,7 +138,9 @@ export default function Play(){
                     >
                       <TableCell component="th" scope="row">{ row.name }</TableCell>
                       <TableCell> { row.length } 単語</TableCell>
-                      <TableCell> {row.action } </TableCell>
+                      <TableCell>
+                        <Button onClick={ () => selectWordList(row.name) } variant="outlined">選択</Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
