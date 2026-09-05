@@ -2,6 +2,10 @@
 
 自分の単語リストで練習できるタイピングアプリです。
 
+## v0.5.1 — コード構成の整理
+
+認証レイアウトを共通化し、練習ロジック・API通信・記録操作を画面から分離しました。既存の画面URLと保存形式を維持しています。ローカルのビルド・型チェック・Lint、単体・実DBテスト10件、E2E 9件が通過しています。
+
 ## v0.5.0 — 依存関係更新
 
 Next.js 16.3.4、React 19.2.8、Tailwind CSS 4.3.3、TypeScript 6.0.3、ESLint 9.39.5へ更新しました。Next.jsはTurbopack、Tailwindは専用PostCSSプラグイン、LintはESLint CLIのflat configを使用します。

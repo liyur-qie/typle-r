@@ -5,10 +5,11 @@ import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
 import { useWordLists } from "@/lib/useWordLists"
 
+import { recentRecords, removeRecord } from "@/lib/records"
+
 export default function Records() {
   const { lists, ready, error, update } = useWordLists()
-  const rows = lists.flatMap(list => list.records.map((record, index) => ({ list, record, index })))
-    .sort((a, b) => Date.parse(b.record.date) - Date.parse(a.record.date))
+  const rows = recentRecords(lists)
   return <Page><PageContainer>
     <h1 className="text-2xl mb-6">練習記録</h1>
     <p>ログイン中のアカウントに保存した記録です。単語数は練習時点の値です。</p>
@@ -21,9 +22,7 @@ export default function Records() {
           <td>{record.mistakes ?? '—'}</td><td>{record.accuracy === undefined ? '—' : `${record.accuracy}%`}</td>
           <td>{new Date(record.date).toLocaleString('ja-JP')}</td>
           <td><Button color="error" aria-label={`${list.name} の ${new Date(record.date).toLocaleString('ja-JP')} の記録を削除`} onClick={() => {
-            if (window.confirm('この練習記録を削除しますか？')) update(current => current.map(item => item.id !== list.id ? item : {
-              ...item, records: item.records.filter(r => record.id ? r.id !== record.id : !(r.date === record.date && r.time === record.time)),
-            }))
+            if (window.confirm('この練習記録を削除しますか？')) void update(current => removeRecord(current, list.id, record))
           }}>削除</Button></td>
         </tr>)}</tbody>
       </table></div>}

@@ -20,3 +20,21 @@ export function addRecord(lists: SavedWordList[], listId: string, record: Practi
   return lists.map(list => list.id !== listId || list.records.some(item => item.id === record.id)
     ? list : { ...list, records: [...list.records, record] })
 }
+
+type StoredRecord = SavedWordList['records'][number]
+
+export function recentRecords(lists: SavedWordList[]) {
+  return lists.flatMap(list => list.records.map((record, index) => ({ list, record, index })))
+    .sort((a, b) => Date.parse(b.record.date) - Date.parse(a.record.date))
+}
+
+export function bestRecords(records: StoredRecord[], limit = 5) {
+  return [...records].sort((a, b) => (b.accuracy ?? -1) - (a.accuracy ?? -1) || a.time - b.time).slice(0, limit)
+}
+
+export function removeRecord(lists: SavedWordList[], listId: string, record: StoredRecord) {
+  return lists.map(list => list.id !== listId ? list : {
+    ...list, records: list.records.filter(item => record.id
+      ? item.id !== record.id : !(item.date === record.date && item.time === record.time)),
+  })
+}

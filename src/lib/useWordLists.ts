@@ -2,11 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import samples from '@/json/WordListsResponse.json'
-import { decodeLists, SavedWordList } from './wordLists'
+import { type SavedWordList } from './wordLists'
+import { readWorkspace, writeWorkspace, WorkspaceError, type WorkspaceState } from './workspaceClient'
 
 const defaults: SavedWordList[] = samples.map((list, index) => ({ ...list, id: `sample-${index + 1}`, records: [] }))
 const changedEvent = 'typle-r:cloud-changed'
-type State = { lists: SavedWordList[]; revision: number; accountId: string }
 
 export function useWordLists() {
   const { data: session, status } = useSession()
@@ -24,21 +24,18 @@ export function useWordLists() {
     setReady(false)
     setError('')
   }
-  const state = useRef<State | null>(null)
+  const state = useRef<WorkspaceState | null>(null)
   const busy = useRef(false)
   const generation = useRef(0)
 
   const load = useCallback(async () => {
     if (!accountId) return
     const currentGeneration = generation.current
-    const res = await fetch('/api/workspace', { cache: 'no-store' })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error ?? 'データを読み込めませんでした。')
+    const data = await readWorkspace()
     if (data.accountId !== accountId || currentGeneration !== generation.current) throw new Error('ログイン状態が変わりました。画面を開き直してください。')
-    const loaded = decodeLists(JSON.stringify({ version: 1, lists: data.lists }))
     if (state.current && state.current.revision > data.revision) return state.current
-    state.current = { ...data, lists: loaded }
-    setLists(data.revision === 0 ? defaults : loaded)
+    state.current = data
+    setLists(data.revision === 0 ? defaults : data.lists)
     return state.current
   }, [accountId])
 
@@ -73,15 +70,7 @@ export function useWordLists() {
     setSaving(true)
     try {
       const next = change(previous.revision === 0 && useDefaults ? defaults : previous.lists)
-      const res = await fetch('/api/workspace', {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lists: next, revision: previous.revision, accountId }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        if (res.status === 409) await load()
-        throw new Error(data.error ?? '保存できませんでした。')
-      }
+      const data = await writeWorkspace({ lists: next, revision: previous.revision, accountId })
       if (currentGeneration !== generation.current || data.accountId !== accountId) throw new Error('ログイン状態が変わりました。')
       state.current = data
       setLists(data.lists)
@@ -89,6 +78,9 @@ export function useWordLists() {
       window.dispatchEvent(new Event(changedEvent))
       return true
     } catch (reason) {
+      if (reason instanceof WorkspaceError && reason.status === 409 && currentGeneration === generation.current) {
+        try { await load() } catch (refreshError) { reason = refreshError }
+      }
       if (currentGeneration !== generation.current) return false
       setError(reason instanceof Error ? reason.message : '保存に失敗しました。もう一度お試しください。')
       return false

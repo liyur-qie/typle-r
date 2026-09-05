@@ -1,13 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
 import Button from "@/components/ui/Button"
 import { useWordLists } from "@/lib/useWordLists"
 import type { SavedWordList } from "@/lib/wordLists"
-import { addRecord, makeRecord, PracticeRecord } from "@/lib/records"
+import { usePractice } from "@/lib/usePractice"
+import type { WorkspaceUpdate } from "@/lib/workspaceClient"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
-import { newSession, sessionResult, typeInput } from "@/lib/typing"
 
 export default function Play() {
   const { lists, ready, error, update } = useWordLists()
@@ -18,44 +17,9 @@ export default function Play() {
 function Practice({ wordLists, error, update }: {
   wordLists: SavedWordList[]
   error: string
-  update: (change: (lists: SavedWordList[]) => SavedWordList[]) => Promise<boolean>
+  update: WorkspaceUpdate
 }) {
-  const [list, setList] = useState<SavedWordList | undefined>(wordLists[0])
-  const selected = wordLists.findIndex(item => item.id === list?.id)
-  const [session, setSession] = useState(newSession)
-  const [composition, setComposition] = useState<string | null>(null)
-  const composing = useRef(false)
-  const committedComposition = useRef<string | null>(null)
-  const completedRecord = useRef<PracticeRecord | null>(null)
-  const [saved, setSaved] = useState(false)
-  const input = useRef<HTMLInputElement>(null)
-  const word = list?.words[session.index]
-  const finished = session.finishedAt !== null
-  const result = sessionResult(session)
-
-  useEffect(() => { if (!finished) input.current?.focus() }, [finished, selected])
-
-  function restart(index = selected) {
-    setList(wordLists[index])
-    setSession(newSession())
-    setComposition(null)
-    composing.current = false
-    committedComposition.current = null
-    completedRecord.current = null
-    setSaved(false)
-    input.current?.focus()
-  }
-
-  function enter(value: string) {
-    if (completedRecord.current) return
-    const next = typeInput(session, list?.words ?? [], value, Date.now())
-    setSession(next)
-    if (next.finishedAt !== null && list) {
-      const record = makeRecord(next, list.words.length, crypto.randomUUID())
-      completedRecord.current = record
-      void update(current => addRecord(current, list.id, record)).then(value => { if (completedRecord.current === record) setSaved(value) })
-    }
-  }
+  const { list, selected, session, composition, startComposition, endComposition, changeInput, saved, input, word, finished, result, restart, retrySave } = usePractice(wordLists, update)
 
   return <Page className="pb-12"><PageContainer>
     <h1 className="text-2xl mb-6">タイピング練習</h1>
@@ -82,21 +46,9 @@ function Practice({ wordLists, error, update }: {
         value={composition ?? session.input} disabled={finished} autoComplete="off" autoCapitalize="off" spellCheck={false}
         aria-label="表示された文字を入力" aria-invalid={!!session.input && !word?.input.startsWith(session.input)}
         onPaste={event => event.preventDefault()} onDrop={event => event.preventDefault()}
-        onCompositionStart={() => { composing.current = true; setComposition(session.input) }}
-        onCompositionEnd={event => {
-          composing.current = false
-          committedComposition.current = event.currentTarget.value
-          setComposition(null)
-          enter(event.currentTarget.value)
-        }}
-        onChange={event => {
-          if (composing.current || (event.nativeEvent as InputEvent).isComposing) setComposition(event.target.value)
-          else {
-            const duplicate = committedComposition.current === event.target.value
-            committedComposition.current = null
-            if (!duplicate) enter(event.target.value)
-          }
-        }} />
+        onCompositionStart={startComposition}
+        onCompositionEnd={event => endComposition(event.currentTarget.value)}
+        onChange={event => changeInput(event.target.value, (event.nativeEvent as InputEvent).isComposing)} />
       {!finished && session.input && !word?.input.startsWith(session.input) && <p role="status" className="text-red-700">入力が違います。Backspaceで修正してください。</p>}
       {finished && <section aria-label="練習結果" className="my-6 p-6 bg-green-50">
         <h2 className="text-xl">おつかれさまでした！</h2>
@@ -104,10 +56,7 @@ function Practice({ wordLists, error, update }: {
         <p>所要時間: {result.time.toFixed(2)} 秒</p>
         <p>ミス数: {result.mistakes} 文字 ／ 正確率: {result.accuracy}%</p>
         <p role="status">{saved ? "練習記録を保存しました。" : "記録はまだ保存されていません。"}</p>
-        {!saved && <Button onClick={() => {
-          const record = completedRecord.current
-          if (record && list) void update(current => addRecord(current, list.id, record)).then(value => { if (completedRecord.current === record) setSaved(value) })
-        }}>記録の保存を再試行</Button>}
+        {!saved && <Button onClick={retrySave}>記録の保存を再試行</Button>}
       </section>}
       <div className="my-6"><Button variant="outlined" onClick={() => restart()}>最初からやり直す</Button></div>
     </>}
