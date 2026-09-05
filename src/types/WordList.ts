@@ -1,4 +1,5 @@
 export type WordList = {
+  id?: string,
   name: string,
   words: {
     display: string,

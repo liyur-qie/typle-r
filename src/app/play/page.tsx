@@ -2,20 +2,27 @@
 
 import { useEffect, useRef, useState } from "react"
 import Button from "@mui/material/Button"
-import WordListsResponse from "@/json/WordListsResponse.json"
+import { useWordLists } from "@/lib/useWordLists"
+import type { SavedWordList } from "@/lib/wordLists"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
 import { newSession, sessionResult, typeInput } from "@/lib/typing"
 
 export default function Play() {
-  const wordLists = WordListsResponse
-  const [selected, setSelected] = useState(0)
+  const { lists, ready, error } = useWordLists()
+  if (!ready) return <Page><PageContainer><p>読み込み中…</p></PageContainer></Page>
+  if (error) return <Page><PageContainer><p role="alert">{error}</p></PageContainer></Page>
+  return <Practice wordLists={lists} />
+}
+
+function Practice({ wordLists }: { wordLists: SavedWordList[] }) {
+  const [list, setList] = useState<SavedWordList | undefined>(wordLists[0])
+  const selected = wordLists.findIndex(item => item.id === list?.id)
   const [session, setSession] = useState(newSession)
   const [composition, setComposition] = useState<string | null>(null)
   const composing = useRef(false)
   const committedComposition = useRef<string | null>(null)
   const input = useRef<HTMLInputElement>(null)
-  const list = wordLists[selected]
   const word = list?.words[session.index]
   const finished = session.finishedAt !== null
   const result = sessionResult(session)
@@ -23,7 +30,7 @@ export default function Play() {
   useEffect(() => { if (!finished) input.current?.focus() }, [finished, selected])
 
   function restart(index = selected) {
-    setSelected(index)
+    setList(wordLists[index])
     setSession(newSession())
     setComposition(null)
     composing.current = false
@@ -38,7 +45,7 @@ export default function Play() {
   return <Page className="pb-12"><PageContainer>
     <h1 className="text-2xl mb-6">タイピング練習</h1>
     <div className="flex gap-3 flex-wrap mb-6" aria-label="単語リスト">
-      {wordLists.map((item, index) => <Button key={item.name} variant={index === selected ? "contained" : "outlined"}
+      {wordLists.map((item, index) => <Button key={item.id} variant={index === selected ? "contained" : "outlined"}
         aria-pressed={index === selected} onClick={() => restart(index)}>{item.name}</Button>)}
     </div>
     <h2 className="text-xl">選択中: {list?.name ?? "リストなし"}</h2>
