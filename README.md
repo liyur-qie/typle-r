@@ -28,9 +28,15 @@ http://localhost:3000 を開きます。
 npm test
 npm run lint
 npm run build
+npx playwright install chromium
+npm run test:e2e
 ```
 
 テストでは入力判定、練習結果、保存データの検証・復元、重複記録防止を確認します。
+
+E2Eテストは本番ビルドをポート3101で起動し、リストの作成・編集・練習完了・記録保存と削除を検証します。先に `npm run build` を実行してください。開発サーバーの `.next` と本番の `.next-production` は分離しています。
+
+GitHub Actionsはmain/devへのpushとPRで、型チェック・単体テスト・Lint・本番ビルド・E2Eテストを実行します。
 
 ## リリース
 
