@@ -3,7 +3,7 @@ import NavbarListItem from "./NavbarListItem"
 export default function NavbarList(){
   const routes = [
     { title: "ガイド", path: "/guide" },
-    { title: "GitHub", path: "/github" },
+    { title: "GitHub", path: "https://github.com/liyur-qie/typle-r" },
   ]
 
   const navbarListItems = routes.map((route, index) => {

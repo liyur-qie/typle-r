@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Typle
 
-## Getting Started
+自分の単語リストで練習できるタイピングアプリです。
 
-First, run the development server:
+## 機能
 
-```bash
+- 正誤判定、単語の自動進行、完了表示、リトライ（日本語IME対応）
+- 単語リストの作成・編集・並べ替え・削除
+- 所要時間・ミス文字数・正確率の記録と削除
+- リストごとの個人ベスト記録
+
+データはlocalStorageに保存します。端末間同期はなく、ブラウザーの保存データを消去すると失われます。初回はサンプル単語リストを表示し、ダミーの練習記録は追加しません。
+
+## 開発
+
+Node.js 22とnpmを使用します。
+
+```sh
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 を開きます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 検証
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```sh
+npm test
+npm run lint
+npm run build
+```
 
-## Learn More
+テストでは入力判定、練習結果、保存データの検証・復元、重複記録防止を確認します。
 
-To learn more about Next.js, take a look at the following resources:
+## リリース
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+package.jsonとpackage-lock.jsonのバージョンを揃え、検証後にコミット・タグをGitでpushし、GitHub CLIでリリースを作成します。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```sh
+gh release create v0.1.x --verify-tag --title v0.1.x --notes-file release-notes.md
+```
 
-## Deploy on Vercel
+## 保存形式
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+キーは `typle-r:word-lists:v1`、形式は `{ version: 1, lists: [...] }` です。読み込み不能なデータは上書きしません。リスト削除では関連する練習記録も削除します。

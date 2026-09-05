@@ -69,6 +69,7 @@ function Practice({ wordLists, error, update }: {
       <p className="my-4" role="status">{finished ? "練習完了！" : `${session.index + 1} / ${list.words.length} 単語`}</p>
       {!finished && <>
         <div id="wordDisplay" className="bg-gray-900 text-white p-8 text-4xl text-center break-all">{word?.display}</div>
+        {word?.annotation && <p className="mt-3">{word.annotation}</p>}
         <p className="my-4 text-2xl break-all" aria-label="入力する文字">
           {Array.from(word?.input ?? "").map((char, index) => {
             const typed = Array.from(session.input)[index]

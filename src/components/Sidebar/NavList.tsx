@@ -32,6 +32,9 @@ export default function NavList(){
         </Link>
       </li>
       <li className="navbarListItem">
+        <Link href="/rankings" className="block box-border text-sm py-5 px-6">ベスト記録</Link>
+      </li>
+      <li className="navbarListItem">
         <Link href="/edit" className="block box-border text-sm py-5 px-6">
           編集
         </Link>

@@ -1,44 +1,27 @@
-export default function Page() {
-  return (
-    <>
-      <main>
-        <section>
-          <h1 id="about" className="text-5xl">概要</h1>
-          <p className="mt-9">
-            Typle(タイプル)はタイピング練習用の無料Webアプリです。
-            タイピングを練習する際に入力する単語のリストは自分で自由に追加、編集が可能です。
-          </p>
-        </section>
-        <section className="mt-24">
-          <h2 id="how-to-play" className="text-4xl">遊び方</h2>
-          <p className="mt-9">
-            単語ディスプレイ(画像1)に表示されている文字を入力エリア(画像2)にタイプしましょう。
-            タイプの正誤判定は一文字づつ行われ、正しい場合は「緑」でハイライトされ、間違っている場合は「赤」でハイライトされます。
-            タイプしたすべての文字が単語ディスプレイの内容と等しい場合、次の単語が表示されるのでこれを最後の単語リストの単語の入力まで繰り返します。
-            すべての単語の入力が終わるとタイプにかかった時間、ミスタイプ数、正確性が表示されます。
-          </p>
-        </section>
-        <section className="mt-24">
-          <h2 id="how-to-check-records" className="text-4xl">練習記録の確認</h2>
-          <p className="mt-9">
-            Lorem ipsum dolor sit amet consectetur adipiscing elit Ut et massa
-            mi. Aliquam in hendrerit urna. Pellentesque sit amet sapien
-            fringilla, mattis ligula consectetur, ultrices mauris. Maecenas
-            vitae mattis tellus. Nullam quis imperdiet augue. Vestibulum auctor
-            ornare leo, non suscipit magna interdum eu. Curabitur pellentesque
-            nibh nibh, at maximus ante.
-          </p>
-        </section>
-        <a href="#how-to-play">s</a>
-      </main>
-      <aside>
-        <p className="text-sm font-bold">目次</p>
-        <ul className="index mt-8">
-          <li v-for="(index, indexKey) in indexes">
-            <a href="#" className="block text-sm px-4 py-2">a</a>
-          </li>
-        </ul>
-      </aside>
-    </>
-  )
+import Link from "next/link"
+import Page from "@/components/Page/Page"
+import PageContainer from "@/components/PageContainer/PageContainer"
+
+export default function Guide() {
+  return <Page><PageContainer>
+    <h1 className="text-3xl mb-8">使い方</h1>
+    <section className="mb-8 space-y-3"><h2 className="text-xl">1. 練習する</h2>
+      <p>「遊ぶ」で単語リストを選択し、表示された入力用の文字をタイプします。正しい文字は緑、違う文字は赤で示します。誤入力はBackspaceで修正してください。</p>
+      <p>すべての文字が一致すると次の単語へ進み、最後の単語で完了します。最初の入力から完了までを計時します。日本語はIMEで確定した文字で判定します。貼り付けとドラッグ入力は使えません。</p>
+      <p>「最初からやり直す」またはリスト切り替えで進行をリセットします。途中までの練習は記録しません。</p>
+    </section>
+    <section className="mb-8 space-y-3"><h2 className="text-xl">2. 自分の単語を追加する</h2>
+      <p>「作成」でリスト名、表示する単語、入力する文字を入力します。表示と入力には異なる文字を指定でき、補足は任意です。単語の追加・削除・並べ替えができます。</p>
+      <p>「保存」で確定します。「編集」で既存のリストを変更でき、キャンセルすれば変更を保存しません。空のリストや同じ名前のリストは保存できません。</p>
+    </section>
+    <section className="mb-8 space-y-3"><h2 className="text-xl">3. 結果と記録を見る</h2>
+      <p>完了すると所要時間、ミス文字数、正確率を表示し、自動保存します。正確率は入力した文字のうち正しかった文字の割合です。削除操作は文字数に含めず、訂正して再入力した文字は含めます。</p>
+      <p>「記録」で履歴を確認・削除できます。「ベスト記録」にはリストごとの上位5件を表示します。保存に失敗した場合は完了画面の「記録の保存を再試行」を押してください。</p>
+    </section>
+    <section className="space-y-3"><h2 className="text-xl">保存について</h2>
+      <p>単語リストと記録は、この端末のこのブラウザーに保存します。アカウント登録やクラウド同期はありません。閲覧データの消去やプライベートウィンドウの終了により失われる場合があります。</p>
+      <p>リストを削除すると、そのリストの記録も削除されます。</p>
+    </section>
+    <p className="mt-8"><Link href="/play" className="underline">練習を始める</Link></p>
+  </PageContainer></Page>
 }
