@@ -1,155 +1,85 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import WordListsResponse from "@/json/WordListsResponse.json"
-import type { WordList } from "@/types/WordList"
+import { useEffect, useRef, useState } from "react"
 import Button from "@mui/material/Button"
-import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import PageContainer from "@/components/PageContainer/PageContainer"
+import WordListsResponse from "@/json/WordListsResponse.json"
 import Page from "@/components/Page/Page"
-import Stack from "@mui/material/Stack"
-import Chip from "@mui/material/Chip"
+import PageContainer from "@/components/PageContainer/PageContainer"
+import { newSession, sessionResult, typeInput } from "@/lib/typing"
 
-export default function Play(){
-  const [wordLists, setWordLists] = useState<WordList[]>([])
-  const [wordList, setWordList] = useState<WordList>()
-  const wordListName = wordList?.name ?? ""
-  const displayWord = wordList?.words[0]?.display ?? ""
-  const [inputValue, setInputValue] = useState<string>("")
+export default function Play() {
+  const wordLists = WordListsResponse
+  const [selected, setSelected] = useState(0)
+  const [session, setSession] = useState(newSession)
+  const [composition, setComposition] = useState<string | null>(null)
+  const composing = useRef(false)
+  const committedComposition = useRef<string | null>(null)
+  const input = useRef<HTMLInputElement>(null)
+  const list = wordLists[selected]
+  const word = list?.words[session.index]
+  const finished = session.finishedAt !== null
+  const result = sessionResult(session)
 
-  useEffect(() => {
-    setWordLists(WordListsResponse)
-  }, [])
+  useEffect(() => { if (!finished) input.current?.focus() }, [finished, selected])
 
-  function createWordListRecordsRowsData(
-    index: number,
-    time: number,
-    date: string,
-  ) {
-    return { index, time, date };
+  function restart(index = selected) {
+    setSelected(index)
+    setSession(newSession())
+    setComposition(null)
+    composing.current = false
+    committedComposition.current = null
+    input.current?.focus()
   }
 
-  function createWordListsRowsData(
-    name: string,
-    length: number,
-    action: React.ReactNode,
-  ) {
-    return { name, length, action };
-  }
-  
-  const wordListRecordsRows = wordList ? wordList.records.map((record, index) => (
-    createWordListRecordsRowsData(index, record.time, record.date)
-  )) : []
-  const wordListsRows = wordLists.map((wordList, index) => (
-    createWordListsRowsData(wordList.name, wordList.words.length, <Button variant="outlined">選択</Button>)
-  ))
-
-  const selectWordList = (wordListName: string) => {
-    const selectedWordList = wordLists.find(wordList => wordList.name === wordListName)
-    if (!selectedWordList) return
-
-    setWordList(selectedWordList)
-    setInputValue("")
+  function enter(value: string) {
+    setSession(current => typeInput(current, list?.words ?? [], value, Date.now()))
   }
 
-  return (
-    <Page className="pb-12">
-      <section id="playArea">
-        <div
-          id="wordDisplay"
-          className="bg-gray-900 text-white flex justify-center items-center text-4xl h-28"
-        >
-          { displayWord }
-        </div>
-        <input
-          id="wordInputField"
-          value={inputValue}
-          onChange={ e => setInputValue(e.target.value) }
-          type="text"
-          className="bg-gray-800 text-white text-center w-full text-2xl font-light h-28 outline-none"
-          placeholder="Type the word above here"
-        />
-        { inputValue }
-      </section>
-      <div className="mx-auto mt-8 px-6">
-        <section id="wordList">
-          <h1 className="text-xl my-3">選択中: { wordListName }</h1>
-          <Stack direction="row" spacing={1}>
-            {
-              wordList?.words.map((word, index) => (
-                <Chip key={ index } label={ word.input } color="primary" variant="outlined" />
-              ))
-            }
-          </Stack>
-        </section>
-        <section className="mt-8 flex flex-wrap justify-between">
-          <section id="rankings" className="lg:w-6/12 md:w-full">
-            <h2 className="text-2xl">
-              練習記録
-            </h2>
-            <TableContainer>
-              <Table aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>No.</TableCell>
-                    <TableCell>所要時間</TableCell>
-                    <TableCell>プレイ日時</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  { wordListRecordsRows.map((row, index) => (
-                    <TableRow
-                      key={index}
-                    >
-                      <TableCell component="th" scope="row">{ index + 1 }</TableCell>
-                      <TableCell> { row.time } 秒</TableCell>
-                      <TableCell> {row.date } </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </section>
-          <section
-            id="selectWordList"
-            className="lg:w-5/12 md:w-full md:mt-6 lg:mt-0"
-          >
-            <h2 className="text-2xl">
-              単語リスト
-            </h2>
-            <TableContainer>
-              <Table aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>単語リスト名</TableCell>
-                    <TableCell>単語数</TableCell>
-                    <TableCell>操作</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {wordListsRows.map((row) => (
-                    <TableRow
-                      key={row.name}
-                    >
-                      <TableCell component="th" scope="row">{ row.name }</TableCell>
-                      <TableCell> { row.length } 単語</TableCell>
-                      <TableCell>
-                        <Button onClick={ () => selectWordList(row.name) } variant="outlined">選択</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </section>
-        </section>
-      </div>
-    </Page>
-  )
+  return <Page className="pb-12"><PageContainer>
+    <h1 className="text-2xl mb-6">タイピング練習</h1>
+    <div className="flex gap-3 flex-wrap mb-6" aria-label="単語リスト">
+      {wordLists.map((item, index) => <Button key={item.name} variant={index === selected ? "contained" : "outlined"}
+        aria-pressed={index === selected} onClick={() => restart(index)}>{item.name}</Button>)}
+    </div>
+    <h2 className="text-xl">選択中: {list?.name ?? "リストなし"}</h2>
+    {!list?.words.length ? <p>単語がありません。単語リストを作成してください。</p> : <>
+      <p className="my-4" role="status">{finished ? "練習完了！" : `${session.index + 1} / ${list.words.length} 単語`}</p>
+      {!finished && <>
+        <div id="wordDisplay" className="bg-gray-900 text-white p-8 text-4xl text-center break-all">{word?.display}</div>
+        <p className="my-4 text-2xl break-all" aria-label="入力する文字">
+          {Array.from(word?.input ?? "").map((char, index) => {
+            const typed = Array.from(session.input)[index]
+            return <span key={index} className={typed === undefined ? "" : typed === char ? "text-green-700 underline" : "text-red-700 underline"}>{char}</span>
+          })}
+        </p>
+        <label htmlFor="wordInputField">表示された文字を入力</label>
+      </>}
+      <input ref={input} id="wordInputField" className={`border rounded p-4 w-full text-2xl ${finished ? "hidden" : ""}`}
+        value={composition ?? session.input} disabled={finished} autoComplete="off" autoCapitalize="off" spellCheck={false}
+        aria-label="表示された文字を入力" aria-invalid={!!session.input && !word?.input.startsWith(session.input)}
+        onPaste={event => event.preventDefault()} onDrop={event => event.preventDefault()}
+        onCompositionStart={() => { composing.current = true; setComposition(session.input) }}
+        onCompositionEnd={event => {
+          composing.current = false
+          committedComposition.current = event.currentTarget.value
+          setComposition(null)
+          enter(event.currentTarget.value)
+        }}
+        onChange={event => {
+          if (composing.current || (event.nativeEvent as InputEvent).isComposing) setComposition(event.target.value)
+          else {
+            const duplicate = committedComposition.current === event.target.value
+            committedComposition.current = null
+            if (!duplicate) enter(event.target.value)
+          }
+        }} />
+      {!finished && session.input && !word?.input.startsWith(session.input) && <p role="status" className="text-red-700">入力が違います。Backspaceで修正してください。</p>}
+      {finished && <section aria-label="練習結果" className="my-6 p-6 bg-green-50">
+        <h2 className="text-xl">おつかれさまでした！</h2>
+        <p>{list.words.length} 単語を完了しました。</p>
+        <p>所要時間: {result.time.toFixed(2)} 秒</p>
+      </section>}
+      <div className="my-6"><Button variant="outlined" onClick={() => restart()}>最初からやり直す</Button></div>
+    </>}
+  </PageContainer></Page>
 }
