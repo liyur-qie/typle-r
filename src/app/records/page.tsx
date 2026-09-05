@@ -11,7 +11,7 @@ export default function Records() {
     .sort((a, b) => Date.parse(b.record.date) - Date.parse(a.record.date))
   return <Page><PageContainer>
     <h1 className="text-2xl mb-6">練習記録</h1>
-    <p>このブラウザーに保存した記録です。単語数は練習時点の値です。</p>
+    <p>ログイン中のアカウントに保存した記録です。単語数は練習時点の値です。</p>
     {error && <p role="alert" className="text-red-700">{error}</p>}
     {!ready ? <p>読み込み中…</p> : !rows.length ? <p className="my-6">まだ記録がありません。<Link className="underline" href="/play">練習を始める</Link></p> :
       <div className="overflow-x-auto my-6"><table className="w-full text-left">

@@ -3,6 +3,8 @@ import "@/scss/globals.scss";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar/Navbar";
 import PageContainer from "@/components/PageContainer/PageContainer";
+import AuthProvider from "@/components/AuthProvider";
+import AccountBar from "@/components/AccountBar";
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -19,13 +21,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ja">
       <body>
+      <AuthProvider>
       <div className="flex flex-wrap">
       <Sidebar />
       <div className="flex-auto">
         <Navbar />
+        <AccountBar />
         { children }
       </div>
     </div>
+      </AuthProvider>
       </body>
     </html>
   );

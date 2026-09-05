@@ -18,7 +18,7 @@ export default function Play() {
 function Practice({ wordLists, error, update }: {
   wordLists: SavedWordList[]
   error: string
-  update: (change: (lists: SavedWordList[]) => SavedWordList[]) => boolean
+  update: (change: (lists: SavedWordList[]) => SavedWordList[]) => Promise<boolean>
 }) {
   const [list, setList] = useState<SavedWordList | undefined>(wordLists[0])
   const selected = wordLists.findIndex(item => item.id === list?.id)
@@ -53,7 +53,7 @@ function Practice({ wordLists, error, update }: {
     if (next.finishedAt !== null && list) {
       const record = makeRecord(next, list.words.length, crypto.randomUUID())
       completedRecord.current = record
-      setSaved(update(current => addRecord(current, list.id, record)))
+      void update(current => addRecord(current, list.id, record)).then(value => { if (completedRecord.current === record) setSaved(value) })
     }
   }
 
@@ -106,7 +106,7 @@ function Practice({ wordLists, error, update }: {
         <p role="status">{saved ? "練習記録を保存しました。" : "記録はまだ保存されていません。"}</p>
         {!saved && <Button onClick={() => {
           const record = completedRecord.current
-          if (record && list) setSaved(update(current => addRecord(current, list.id, record)))
+          if (record && list) void update(current => addRecord(current, list.id, record)).then(value => { if (completedRecord.current === record) setSaved(value) })
         }}>記録の保存を再試行</Button>}
       </section>}
       <div className="my-6"><Button variant="outlined" onClick={() => restart()}>最初からやり直す</Button></div>

@@ -48,5 +48,6 @@ export function saveList(lists: SavedWordList[], list: SavedWordList, editing: b
   const normalized = { ...list, name: list.name.trim(), words: list.words.map(word => ({
     ...word, display: word.display.trim(), input: word.input.trim(), annotation: word.annotation.trim(),
   })) }
+  if (!editing && lists.some(item => item.id === list.id)) return lists.map(item => item.id === list.id ? { ...normalized, records: item.records } : item)
   return editing ? lists.map(item => item.id === list.id ? { ...normalized, records: item.records } : item) : [...lists, normalized]
 }

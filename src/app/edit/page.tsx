@@ -16,8 +16,8 @@ export default function Edit() {
     <h1 className="text-2xl mb-6">単語リストの編集</h1>
     {error && <p role="alert" className="text-red-700 mb-4">{error}</p>}
     {message && <p role="status">{message}</p>}
-    {!ready ? <p>読み込み中…</p> : editing ? <WordListEditor key={editing.id} initial={editing} onCancel={() => setEditing(null)} onSave={list => {
-      const saved = update(current => saveList(current, list, true))
+    {!ready ? <p>読み込み中…</p> : editing ? <WordListEditor key={editing.id} initial={editing} onCancel={() => setEditing(null)} onSave={async list => {
+      const saved = await update(current => saveList(current, list, true))
       if (saved) { setEditing(null); setMessage('保存しました。') }
       return saved
     }} /> : <>
@@ -28,9 +28,9 @@ export default function Edit() {
         <tbody>{lists.map(list => <tr key={list.id} className="border-t">
           <th className="p-3" scope="row">{list.name}</th><td>{list.words.length}</td><td>{list.records.length}</td>
           <td><Button onClick={() => { setEditing(list); setMessage('') }} aria-label={`${list.name} を編集`}>編集</Button>
-            <Button color="error" aria-label={`${list.name} を削除`} onClick={() => {
+            <Button color="error" aria-label={`${list.name} を削除`} onClick={async () => {
               if (window.confirm(`「${list.name}」とその練習記録を削除しますか？`)) {
-                if (update(current => current.filter(item => item.id !== list.id))) setMessage('削除しました。')
+                if (await update(current => current.filter(item => item.id !== list.id))) setMessage('削除しました。')
               }
             }}>削除</Button></td>
         </tr>)}</tbody>

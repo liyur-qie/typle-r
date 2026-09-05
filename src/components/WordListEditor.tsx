@@ -1,16 +1,19 @@
 "use client"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Button from "@mui/material/Button"
 import TextField from "@mui/material/TextField"
 import type { SavedWordList } from "@/lib/wordLists"
 
 export default function WordListEditor({ initial, onSave, onCancel }: {
   initial?: SavedWordList
-  onSave: (list: SavedWordList) => boolean
+  onSave: (list: SavedWordList) => Promise<boolean>
   onCancel: () => void
 }) {
   const [name, setName] = useState(initial?.name ?? "")
   const [words, setWords] = useState(() => (initial?.words ?? [{ display: "", input: "", annotation: "" }]).map((word, index) => ({ ...word, key: `initial-${index}` })))
+
+  const draftId = useRef<string>()
+  const [saving, setSaving] = useState(false)
 
   function move(index: number, offset: number) {
     setWords(current => {
@@ -22,13 +25,16 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
     })
   }
 
-  return <form onSubmit={event => {
+  return <form onSubmit={async event => {
     event.preventDefault()
-    onSave({ id: initial?.id ?? crypto.randomUUID(), name, words: words.map(({ key, ...word }) => word),
-      records: initial?.records ?? [], createdAt: initial?.createdAt ?? new Date().toISOString() })
+    if (saving) return
+    draftId.current ??= initial?.id ?? crypto.randomUUID()
+    setSaving(true)
+    try { await onSave({ id: draftId.current, name, words: words.map(({ key, ...word }) => word),
+      records: initial?.records ?? [], createdAt: initial?.createdAt ?? new Date().toISOString() }) } finally { setSaving(false) }
   }} className="space-y-6">
     <TextField label="単語リスト名" required fullWidth value={name} onChange={event => setName(event.target.value)} />
-    <p>表示する単語と、正解として入力する文字を指定します。保存先はこのブラウザーです。</p>
+    <p>表示する単語と、正解として入力する文字を指定します。ログイン中のアカウントに保存されます。</p>
     {words.map((word, index) => <fieldset key={word.key} className="border rounded p-4 space-y-4">
       <legend>単語 {index + 1}</legend>
       {([['display', '表示する単語'], ['input', '入力する文字'], ['annotation', '補足']] as const).map(([field, label]) =>
@@ -42,7 +48,7 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
     </fieldset>)}
     <Button onClick={() => setWords(current => [...current, { key: crypto.randomUUID(), display: "", input: "", annotation: "" }])}>単語を追加</Button>
     <div className="flex gap-3">
-      <Button type="submit" variant="contained">保存</Button>
+      <Button type="submit" disabled={saving} variant="contained">{saving ? "保存中…" : "保存"}</Button>
       <Button onClick={onCancel}>キャンセル</Button>
     </div>
   </form>
