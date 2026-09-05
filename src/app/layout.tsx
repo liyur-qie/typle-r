@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar/Navbar";
 import AuthProvider from "@/components/AuthProvider";
-import AccountBar from "@/components/AccountBar";
 
 
 
@@ -17,11 +16,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ja" className="font-sans">
       <body className="bg-muted/40 font-sans text-foreground antialiased">
       <AuthProvider>
+      <Navbar />
       <div className="min-h-screen lg:flex">
       <Sidebar />
       <div className="min-w-0 flex-1">
-        <Navbar />
-        <AccountBar />
         { children }
       </div>
     </div>
