@@ -2,6 +2,10 @@
 
 自分の単語リストで練習できるタイピングアプリです。
 
+## v0.2.2
+
+UIを標準HTMLとTailwind CSSのみで実装しています。MUI・Emotion・Sassは使用しません。共通のボタンと入力欄は `src/components/ui` にあります。モバイル幅ではナビゲーションを画面上部に配置します。
+
 ## v0.2.0
 
 - Auth.jsによるGitHubログイン

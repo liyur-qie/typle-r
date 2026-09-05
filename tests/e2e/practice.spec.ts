@@ -161,3 +161,22 @@ test('legacy data migrates once to the authenticated database account', async ({
   expect((await (await page.request.get('/api/workspace')).json()).lists).toHaveLength(1)
   expect(await page.evaluate(() => localStorage.getItem('typle-r:word-lists:v1'))).toContain('Legacy')
 })
+
+test('Tailwind editor remains accessible and fits mobile and desktop', async ({ page }) => {
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/create')
+    const name = page.getByRole('textbox', { name: '単語リスト名', exact: true })
+    await expect(name).toBeVisible()
+    await expect(name).toHaveAttribute('required', '')
+    await expect(page.getByRole('button', { name: '単語 1 を上へ', exact: true })).toBeDisabled()
+    await page.getByRole('button', { name: '保存', exact: true }).click()
+    await expect(name).toBeFocused()
+    await name.fill('Keyboard test')
+    await name.press('Tab')
+    await expect(page.getByRole('textbox', { name: '表示する単語 1', exact: true })).toBeFocused()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+    await expect(page.getByRole('navigation', { name: 'メインナビゲーション' }).getByRole('link', { name: '作成', exact: true })).toHaveAttribute('aria-current', 'page')
+    await page.screenshot({ path: `test-results/tailwind-editor-${width}.png`, fullPage: true })
+  }
+})

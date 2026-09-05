@@ -1,15 +1,10 @@
+import "./globals.css";
 import type { Metadata } from "next";
-import "@/scss/globals.scss";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar/Navbar";
-import PageContainer from "@/components/PageContainer/PageContainer";
 import AuthProvider from "@/components/AuthProvider";
 import AccountBar from "@/components/AccountBar";
 
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
 
 
 export const metadata: Metadata = {
@@ -20,11 +15,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ja">
-      <body>
+      <body className="bg-neutral-100 font-sans text-slate-900">
       <AuthProvider>
-      <div className="flex flex-wrap">
+      <div className="min-h-screen lg:flex">
       <Sidebar />
-      <div className="flex-auto">
+      <div className="min-w-0 flex-1">
         <Navbar />
         <AccountBar />
         { children }

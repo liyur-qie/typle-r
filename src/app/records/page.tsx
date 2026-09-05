@@ -1,5 +1,5 @@
 "use client"
-import Button from "@mui/material/Button"
+import Button from "@/components/ui/Button"
 import Link from "next/link"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"

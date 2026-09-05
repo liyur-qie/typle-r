@@ -1,7 +1,7 @@
 "use client"
 import { useRef, useState } from "react"
-import Button from "@mui/material/Button"
-import TextField from "@mui/material/TextField"
+import Button from "@/components/ui/Button"
+import TextField from "@/components/ui/TextField"
 import type { SavedWordList } from "@/lib/wordLists"
 
 export default function WordListEditor({ initial, onSave, onCancel }: {
@@ -33,12 +33,12 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
     try { await onSave({ id: draftId.current, name, words: words.map(({ key, ...word }) => word),
       records: initial?.records ?? [], createdAt: initial?.createdAt ?? new Date().toISOString() }) } finally { setSaving(false) }
   }} className="space-y-6">
-    <TextField label="単語リスト名" required fullWidth value={name} onChange={event => setName(event.target.value)} />
+    <TextField label="単語リスト名" required value={name} onChange={event => setName(event.target.value)} />
     <p>表示する単語と、正解として入力する文字を指定します。ログイン中のアカウントに保存されます。</p>
     {words.map((word, index) => <fieldset key={word.key} className="border rounded p-4 space-y-4">
       <legend>単語 {index + 1}</legend>
       {([['display', '表示する単語'], ['input', '入力する文字'], ['annotation', '補足']] as const).map(([field, label]) =>
-        <TextField key={field} label={`${label} ${index + 1}`} required={field !== 'annotation'} fullWidth value={word[field]}
+        <TextField key={field} label={`${label} ${index + 1}`} required={field !== 'annotation'} value={word[field]}
           onChange={event => setWords(current => current.map(item => item.key === word.key ? { ...item, [field]: event.target.value } : item))} />)}
       <div className="flex flex-wrap gap-2">
         <Button disabled={index === 0} onClick={() => move(index, -1)} aria-label={`単語 ${index + 1} を上へ`}>上へ</Button>

@@ -1,6 +1,6 @@
 "use client"
 import { signIn, signOut, useSession } from 'next-auth/react'
-import Button from '@mui/material/Button'
+import Button from '@/components/ui/Button'
 
 export default function AccountBar() {
   const { data: session, status } = useSession()

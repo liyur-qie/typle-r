@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import Button from "@mui/material/Button"
+import Button from "@/components/ui/Button"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
 import WordListEditor from "@/components/WordListEditor"

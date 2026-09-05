@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Button from "@mui/material/Button"
+import Button from "@/components/ui/Button"
 import { useWordLists } from "@/lib/useWordLists"
 import type { SavedWordList } from "@/lib/wordLists"
 import { addRecord, makeRecord, PracticeRecord } from "@/lib/records"

@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import Button from '@mui/material/Button'
+import Button from '@/components/ui/Button'
 import { decodeLists, STORAGE_KEY, SavedWordList } from '@/lib/wordLists'
 import { mergeLegacy, prepareLegacy } from '@/lib/importLegacy'
 

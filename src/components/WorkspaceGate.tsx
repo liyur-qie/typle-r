@@ -1,7 +1,7 @@
 "use client"
 import { signIn, useSession } from 'next-auth/react'
 import { Fragment } from 'react'
-import Button from '@mui/material/Button'
+import Button from '@/components/ui/Button'
 import Page from './Page/Page'
 import PageContainer from './PageContainer/PageContainer'
 

@@ -11,7 +11,7 @@ export default function NavbarList(){
   })
 
   return (
-    <ul className="flex list-style-none">
+    <ul className="flex list-none">
       { navbarListItems }
     </ul>
   )
