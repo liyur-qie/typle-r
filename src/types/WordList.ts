@@ -7,8 +7,12 @@ export type WordList = {
     annotation: string
   }[],
   records: {
+    id?: string,
     time: number,
-    date: string
+    date: string,
+    mistakes?: number,
+    accuracy?: number,
+    wordCount?: number
   }[],
   createdAt: string
 }

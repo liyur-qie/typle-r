@@ -22,7 +22,12 @@ export function decodeLists(raw: string): SavedWordList[] {
     if (!list || typeof list.id !== "string" || !list.id || ids.has(list.id) || typeof list.name !== "string" ||
         typeof list.createdAt !== "string" || !Array.isArray(list.words) || !Array.isArray(list.records) ||
         list.words.some((word: WordList['words'][number]) => !word || typeof word.display !== "string" || typeof word.input !== "string" || typeof word.annotation !== "string") ||
-        list.records.some((record: WordList['records'][number]) => !record || !Number.isFinite(record.time) || record.time < 0 || typeof record.date !== "string")) {
+        list.records.some((record: WordList['records'][number]) => !record || !Number.isFinite(record.time) || record.time < 0 || typeof record.date !== "string" ||
+          !Number.isFinite(Date.parse(record.date)) ||
+          (record.id !== undefined && typeof record.id !== "string") ||
+          (record.accuracy !== undefined && (!Number.isFinite(record.accuracy) || record.accuracy < 0 || record.accuracy > 100)) ||
+          (record.mistakes !== undefined && (!Number.isInteger(record.mistakes) || record.mistakes < 0)) ||
+          (record.wordCount !== undefined && (!Number.isInteger(record.wordCount) || record.wordCount < 1)))) {
       throw new Error("保存データが壊れています。元のデータは変更していません。")
     }
     validateList(list)

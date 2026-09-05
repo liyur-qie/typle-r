@@ -1,66 +1,31 @@
 "use client"
-
-import PageTitle from "@/components/PageTitle/PageTitle"
-import PageDescription from "@/components/PageDescription/PageDescription"
-import WordListsResponse from "@/json/WordListsResponse.json"
-import { useEffect, useState } from "react"
-import { WordList } from "@/types/WordList"
-import Page from "@/components/Page/Page"
-
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Button from "@mui/material/Button"
+import Link from "next/link"
+import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
+import { useWordLists } from "@/lib/useWordLists"
 
 export default function Records() {
-  const [wordLists, setWordLists] = useState<WordList[]>()
-
-  useEffect(() => {
-    setWordLists(WordListsResponse)
-  }, [])
-
-  return (
-    <Page>
-      <PageContainer>
-        <PageTitle>記録</PageTitle>
-        <PageDescription>各単語リストの記録を確認することができます。</PageDescription>
-        { wordLists?.map(wordList => (
-          <section className="mt-12" key={ wordList.name }>
-            <h2 className="text-2xl">{ wordList.name }</h2>
-            <TableContainer className="mt-4">
-                  <Table aria-label="simple table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>No.</TableCell>
-                        <TableCell>所要時間</TableCell>
-                        <TableCell>単語数</TableCell>
-                        <TableCell>練習日時</TableCell>
-                        <TableCell>操作</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      { wordList.records.map((record, index) => (
-                        <TableRow key={ index }>
-                          <TableCell component="th" scope="row">{ index + 1 }</TableCell>
-                          <TableCell> { record.time } 秒</TableCell>
-                          <TableCell>{ wordList.words.length } 単語</TableCell>
-                          <TableCell>{ record.date }</TableCell>
-                          <TableCell>
-                            <Button variant="outlined">削除</Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-          </section>
-          ))
-        }
-      </PageContainer>
-    </Page>
-  )
+  const { lists, ready, error, update } = useWordLists()
+  const rows = lists.flatMap(list => list.records.map((record, index) => ({ list, record, index })))
+    .sort((a, b) => Date.parse(b.record.date) - Date.parse(a.record.date))
+  return <Page><PageContainer>
+    <h1 className="text-2xl mb-6">練習記録</h1>
+    <p>このブラウザーに保存した記録です。単語数は練習時点の値です。</p>
+    {error && <p role="alert" className="text-red-700">{error}</p>}
+    {!ready ? <p>読み込み中…</p> : !rows.length ? <p className="my-6">まだ記録がありません。<Link className="underline" href="/play">練習を始める</Link></p> :
+      <div className="overflow-x-auto my-6"><table className="w-full text-left">
+        <thead><tr>{['リスト', '所要時間', '単語数', 'ミス数', '正確率', '日時', '操作'].map(title => <th className="p-3" key={title}>{title}</th>)}</tr></thead>
+        <tbody>{rows.map(({ list, record, index }) => <tr className="border-t" key={`${list.id}-${record.id ?? index}`}>
+          <th className="p-3" scope="row">{list.name}</th><td>{record.time.toFixed(2)} 秒</td><td>{record.wordCount ?? '—'}</td>
+          <td>{record.mistakes ?? '—'}</td><td>{record.accuracy === undefined ? '—' : `${record.accuracy}%`}</td>
+          <td>{new Date(record.date).toLocaleString('ja-JP')}</td>
+          <td><Button color="error" aria-label={`${list.name} の ${new Date(record.date).toLocaleString('ja-JP')} の記録を削除`} onClick={() => {
+            if (window.confirm('この練習記録を削除しますか？')) update(current => current.map(item => item.id !== list.id ? item : {
+              ...item, records: item.records.filter(r => record.id ? r.id !== record.id : !(r.date === record.date && r.time === record.time)),
+            }))
+          }}>削除</Button></td>
+        </tr>)}</tbody>
+      </table></div>}
+  </PageContainer></Page>
 }

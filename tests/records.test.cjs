@@ -1,0 +1,23 @@
+require('./register.cjs')
+const { test } = require('node:test')
+const assert = require('node:assert/strict')
+const { newSession, typeInput } = require('../src/lib/typing.ts')
+const { makeRecord, addRecord } = require('../src/lib/records.ts')
+const { encodeLists, decodeLists, saveList } = require('../src/lib/wordLists.ts')
+
+test('completed records survive reload and editing; retry never duplicates', () => {
+  const list = { id: 'a', name: 'Test', words: [{ display: 'ab', input: 'ab', annotation: '' }], records: [], createdAt: '2026-09-06' }
+  let s = typeInput(newSession(), list.words, 'a', 1000)
+  s = typeInput(s, list.words, 'ab', 3000)
+  const record = makeRecord(s, 1, 'run-1')
+  let lists = addRecord([list], 'a', record)
+  lists = addRecord(lists, 'a', record)
+  lists = saveList(lists, { ...list, words: [...list.words, ...list.words] }, true)
+  const restored = decodeLists(encodeLists(lists))
+  assert.equal(restored[0].records.length, 1)
+  assert.equal(restored[0].records[0].wordCount, 1)
+  assert.equal(restored[0].records[0].time, 2)
+  assert.deepEqual(decodeLists(encodeLists(restored.map(l => ({ ...l, records: l.records.filter(r => r.id !== record.id) }))))[0].records, [])
+  assert.throws(() => addRecord([], 'a', record))
+  assert.throws(() => makeRecord(newSession(), 1, 'incomplete'))
+})

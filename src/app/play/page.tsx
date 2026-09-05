@@ -4,24 +4,30 @@ import { useEffect, useRef, useState } from "react"
 import Button from "@mui/material/Button"
 import { useWordLists } from "@/lib/useWordLists"
 import type { SavedWordList } from "@/lib/wordLists"
+import { addRecord, makeRecord, PracticeRecord } from "@/lib/records"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
 import { newSession, sessionResult, typeInput } from "@/lib/typing"
 
 export default function Play() {
-  const { lists, ready, error } = useWordLists()
+  const { lists, ready, error, update } = useWordLists()
   if (!ready) return <Page><PageContainer><p>読み込み中…</p></PageContainer></Page>
-  if (error) return <Page><PageContainer><p role="alert">{error}</p></PageContainer></Page>
-  return <Practice wordLists={lists} />
+  return <Practice wordLists={lists} error={error} update={update} />
 }
 
-function Practice({ wordLists }: { wordLists: SavedWordList[] }) {
+function Practice({ wordLists, error, update }: {
+  wordLists: SavedWordList[]
+  error: string
+  update: (change: (lists: SavedWordList[]) => SavedWordList[]) => boolean
+}) {
   const [list, setList] = useState<SavedWordList | undefined>(wordLists[0])
   const selected = wordLists.findIndex(item => item.id === list?.id)
   const [session, setSession] = useState(newSession)
   const [composition, setComposition] = useState<string | null>(null)
   const composing = useRef(false)
   const committedComposition = useRef<string | null>(null)
+  const completedRecord = useRef<PracticeRecord | null>(null)
+  const [saved, setSaved] = useState(false)
   const input = useRef<HTMLInputElement>(null)
   const word = list?.words[session.index]
   const finished = session.finishedAt !== null
@@ -35,15 +41,25 @@ function Practice({ wordLists }: { wordLists: SavedWordList[] }) {
     setComposition(null)
     composing.current = false
     committedComposition.current = null
+    completedRecord.current = null
+    setSaved(false)
     input.current?.focus()
   }
 
   function enter(value: string) {
-    setSession(current => typeInput(current, list?.words ?? [], value, Date.now()))
+    if (completedRecord.current) return
+    const next = typeInput(session, list?.words ?? [], value, Date.now())
+    setSession(next)
+    if (next.finishedAt !== null && list) {
+      const record = makeRecord(next, list.words.length, crypto.randomUUID())
+      completedRecord.current = record
+      setSaved(update(current => addRecord(current, list.id, record)))
+    }
   }
 
   return <Page className="pb-12"><PageContainer>
     <h1 className="text-2xl mb-6">タイピング練習</h1>
+    {error && <p role="alert" className="text-red-700 mb-4">{error}</p>}
     <div className="flex gap-3 flex-wrap mb-6" aria-label="単語リスト">
       {wordLists.map((item, index) => <Button key={item.id} variant={index === selected ? "contained" : "outlined"}
         aria-pressed={index === selected} onClick={() => restart(index)}>{item.name}</Button>)}
@@ -85,6 +101,12 @@ function Practice({ wordLists }: { wordLists: SavedWordList[] }) {
         <h2 className="text-xl">おつかれさまでした！</h2>
         <p>{list.words.length} 単語を完了しました。</p>
         <p>所要時間: {result.time.toFixed(2)} 秒</p>
+        <p>ミス数: {result.mistakes} 文字 ／ 正確率: {result.accuracy}%</p>
+        <p role="status">{saved ? "練習記録を保存しました。" : "記録はまだ保存されていません。"}</p>
+        {!saved && <Button onClick={() => {
+          const record = completedRecord.current
+          if (record && list) setSaved(update(current => addRecord(current, list.id, record)))
+        }}>記録の保存を再試行</Button>}
       </section>}
       <div className="my-6"><Button variant="outlined" onClick={() => restart()}>最初からやり直す</Button></div>
     </>}
