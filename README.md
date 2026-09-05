@@ -2,6 +2,14 @@
 
 自分の単語リストで練習できるタイピングアプリです。
 
+## v0.4.0 — Prisma
+
+Prisma 7.10のClientとMigrateで保存処理を管理します。既存の `typle_workspaces` を `Workspace` モデルに対応付け、JSONB・所有者ID・revision・DB制約を維持しています。Clientはプロセス内で再利用し、revisionの条件付き更新で同時書き込みの衝突を検出します。
+
+既存のv0.2.x/v0.3.x DBは、初回のみ `npm run db:baseline` を実行してください。スキーマ一致を確認した上で履歴を登録します。新規DBと以後の更新は `npm run db:migrate` を使用します。`migrate reset` や `db push` は通常運用では使用しません。
+
+`npm ci` とビルド時にPrisma Clientを生成します。スキーマ変更後は `npm run db:generate` でも生成できます。マイグレーションSQLは `prisma/migrations` にあります。PostgreSQLのCHECK制約はSQL側で管理します。
+
 ## v0.3.0
 
 Tailwindへの統一後に残っていたSass・Immutableをインストール情報とロックファイルから除去しました。Emotion・MUIもソース・直接依存・ロックされたパッケージに含まれません。Next.js内部で必要な `styled-jsx` は維持しています。
@@ -14,7 +22,7 @@ UIを標準HTMLとTailwind CSSのみで実装しています。MUI・Emotion・S
 
 - Auth.jsによるGitHubログイン
 - ユーザーごとの単語リスト・練習記録をPostgreSQLに保存
-- Neon HTTP接続と通常のPostgreSQL接続に対応
+- NeonとDockerのPostgreSQL接続に対応（Prisma + pgアダプター）
 - v0.1.xのlocalStorageデータをホームから明示的に移行（元データは保持）
 - 同時更新はrevisionで検出し、他の画面の変更を上書きせず再試行を案内
 
@@ -22,7 +30,7 @@ UIを標準HTMLとTailwind CSSのみで実装しています。MUI・Emotion・S
 
 ## Dockerでの仮運用
 
-Node.js 22以上、npm、Docker Composeを使用します。
+Node.js 22.12以上の22系、または24以上、npm、Docker Composeを使用します。
 
 ```sh
 npm ci
@@ -50,15 +58,15 @@ npm run dev
 
 Vercel MarketplaceでNeonを接続し、サーバー用の環境変数を設定します。
 
-- `DATABASE_DRIVER=neon`
-- `DATABASE_URL`: Neonの接続URL（`POSTGRES_URL`も代替として利用可能）
+- `DATABASE_URL`: NeonのPostgreSQL接続URL（pooled接続可、`POSTGRES_URL`も代替として利用可能）
+- `DIRECT_URL`: マイグレーション用の直接接続URL（任意、未指定時はDATABASE_URL）。DATABASE_DRIVERは不要です。
 - `AUTH_SECRET`: 暗号学的にランダムな秘密値
 - `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`: 本番用OAuth Appの認証情報
 - `AUTH_URL`: 本番URL。本番OAuth callbackは `<本番URL>/api/auth/callback/github`
 
 対象DBの環境変数を使って `npm run db:migrate` を実行してからデプロイします。DockerのDBからNeonへのデータコピーは自動ではありません。必要な場合はバックアップと復元を別途行います。Neon接続とVercelデプロイは今回未検証です。
 
-公式資料: [Auth.js GitHub](https://authjs.dev/getting-started/providers/github)、[Neon driver](https://neon.com/docs/serverless/serverless-driver)、[PostgreSQL Docker image](https://hub.docker.com/_/postgres)。
+公式資料: [Auth.js GitHub](https://authjs.dev/getting-started/providers/github)、[Prisma](https://www.prisma.io/docs/orm/v7)、[PostgreSQL Docker image](https://hub.docker.com/_/postgres)。
 
 ## 保存とアクセス制御
 
@@ -79,7 +87,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-単体テストは入力判定、記録、移行、形式検証とPGlite上のPostgreSQLクエリを検証します。E2Eは本番ビルドをポート3101で起動し、実PostgreSQLとAPIを通して作成・編集・練習・再読み込み・削除、アカウント分離、401/403/409応答を確認します。テスト専用秘密値で署名したセッションを使うため、GitHub OAuth画面の実ログインは別途確認が必要です。テストユーザーの行だけを終了後に削除します。
+単体テストは入力判定、記録、移行、形式検証と実PostgreSQL上のPrismaクエリを検証します。E2Eは上限10 workersでファイル内も並列実行します。テストごとにランダムなアカウントIDを使用します。本番ビルドをポート3101で起動し、実PostgreSQLとAPIを通して作成・編集・練習・再読み込み・削除、アカウント分離、401/403/409応答を確認します。テスト専用秘密値で署名したセッションを使うため、GitHub OAuth画面の実ログインは別途確認が必要です。テストユーザーの行だけを終了後に削除します。
 
 GitHub ActionsのCIはユーザーの再許可まで無効化しています。検証はローカルで実行します。再許可後は `gh workflow enable ci.yml` で再開できます。開発ビルド `.next` と本番ビルド `.next-production` は分離しています。
 

@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test'
 import { encode } from 'next-auth/jwt'
+import { randomBytes } from 'node:crypto'
 const origin = 'http://127.0.0.1:3101'
 const secret = 'typle-e2e-only-not-a-production-secret-32-bytes'
 let accountId = ''
 test.beforeEach(async ({ context }) => {
-  accountId = 'github:' + Date.now() + Math.floor(Math.random() * 10000)
+  accountId = 'github:' + BigInt('0x' + randomBytes(16).toString('hex')).toString()
   const token = await encode({ token: { sub: accountId, name: 'E2E User' }, secret, salt: 'authjs.session-token' })
   await context.addCookies([{ name: 'authjs.session-token', value: token, url: origin, httpOnly: true, sameSite: 'Lax' }])
 })

@@ -1,24 +1,32 @@
-import { decodeLists, SavedWordList } from './wordLists'
+import { Prisma, type PrismaClient } from '@prisma/client'
+import { decodeLists, type SavedWordList } from './wordLists'
 
 export type Workspace = { lists: SavedWordList[]; revision: number }
-export type Query = (sql: string, values: unknown[]) => Promise<Record<string, unknown>[]>
 
-function unpack(row: Record<string, unknown>): Workspace {
-  return { lists: decodeLists(JSON.stringify({ version: 1, lists: row.lists })), revision: Number(row.revision) }
+function unpack(row: { lists: Prisma.JsonValue; revision: number }): Workspace {
+  return { lists: decodeLists(JSON.stringify({ version: 1, lists: row.lists })), revision: row.revision }
 }
 
-export function workspaceRepository(query: Query) {
+export function workspaceRepository(client: PrismaClient) {
   return {
-    async read(owner: string): Promise<Workspace> {
-      const rows = await query('SELECT lists, revision FROM typle_workspaces WHERE owner_id = $1', [owner])
-      return rows.length ? unpack(rows[0]) : { lists: [], revision: 0 }
+    async read(ownerId: string): Promise<Workspace> {
+      const row = await client.workspace.findUnique({ where: { ownerId } })
+      return row ? unpack(row) : { lists: [], revision: 0 }
     },
-    async write(owner: string, lists: SavedWordList[], revision: number): Promise<Workspace | null> {
-      const values = [owner, JSON.stringify(lists)]
-      const rows = revision === 0
-        ? await query('INSERT INTO typle_workspaces (owner_id, lists) VALUES ($1, $2::jsonb) ON CONFLICT (owner_id) DO NOTHING RETURNING lists, revision', values)
-        : await query('UPDATE typle_workspaces SET lists = $2::jsonb, revision = revision + 1, updated_at = now() WHERE owner_id = $1 AND revision = $3 RETURNING lists, revision', [...values, revision])
-      return rows.length ? unpack(rows[0]) : null
+    async write(ownerId: string, lists: SavedWordList[], revision: number): Promise<Workspace | null> {
+      const data = { lists: lists as unknown as Prisma.InputJsonValue }
+      try {
+        if (revision === 0) return unpack(await client.workspace.create({ data: { ownerId, ...data } }))
+        // Unique owner + revision makes the comparison and update one atomic operation.
+        return unpack(await client.workspace.update({
+          where: { ownerId, revision },
+          data: { ...data, revision: { increment: 1 }, updatedAt: new Date() },
+        }))
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError &&
+            ((revision === 0 && error.code === 'P2002') || (revision > 0 && error.code === 'P2025'))) return null
+        throw error
+      }
     },
   }
 }

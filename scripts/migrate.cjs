@@ -1,17 +1,13 @@
-const fs = require('node:fs')
+const { spawnSync } = require('node:child_process')
 const path = require('node:path')
-const { loadEnvConfig } = require('@next/env')
-const { neon } = require('@neondatabase/serverless')
-const { Client } = require('pg')
-loadEnvConfig(process.cwd())
-async function main() {
-  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL
-  if (!url) throw new Error('DATABASE_URL is missing')
-  const statement = fs.readFileSync(path.join(__dirname, '../migrations/001_workspaces.sql'), 'utf8')
-  if (process.env.DATABASE_DRIVER === 'postgres') {
-    const client = new Client({ connectionString: url })
-    try { await client.connect(); await client.query(statement) } finally { await client.end() }
-  } else { await neon(url).query(statement) }
-  console.log('Database migration completed.')
+const cli = path.join(__dirname, '../node_modules/prisma/build/index.js')
+function run(args) {
+  const result = spawnSync(process.execPath, [cli, ...args], { stdio: 'inherit', env: process.env })
+  if (result.status !== 0) process.exit(result.status || 1)
 }
-main().catch(() => { console.error('Database migration failed. Check the server-only connection settings.'); process.exitCode = 1 })
+if (process.argv.includes('--baseline')) {
+  // Never mark a different schema as applied: first verify the existing database.
+  run(['migrate', 'diff', '--from-config-datasource', '--to-schema', 'prisma/schema.prisma', '--exit-code'])
+  run(['migrate', 'resolve', '--applied', '0001_workspaces'])
+}
+run(['migrate', 'deploy'])

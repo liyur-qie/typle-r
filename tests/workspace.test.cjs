@@ -1,27 +1,35 @@
 require('./register.cjs')
 const test = require('node:test')
 const assert = require('node:assert/strict')
-const fs = require('node:fs')
-const { PGlite } = require('@electric-sql/pglite')
+const { loadEnvConfig } = require('@next/env')
+const { PrismaClient } = require('@prisma/client')
+const { PrismaPg } = require('@prisma/adapter-pg')
+loadEnvConfig(process.cwd())
 const { workspaceRepository } = require('../src/lib/workspaceRepository.ts')
 const { validateWorkspaceRequest } = require('../src/lib/workspaceRequest.ts')
 const { prepareLegacy, mergeLegacy } = require('../src/lib/importLegacy.ts')
 const list = { id: 'one', name: 'One', createdAt: '2026-09-06', words: [{ display: 'a', input: 'a', annotation: '' }], records: [] }
 
-test('PostgreSQL repository isolates owners and atomically rejects stale revisions', async () => {
-  const db = new PGlite()
+test('Prisma repository isolates owners and atomically rejects stale revisions', async () => {
+  const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })
+  const owner = 'test:prisma:' + require('node:crypto').randomUUID()
+  const other = owner + ':other'
   try {
-    await db.exec(fs.readFileSync('migrations/001_workspaces.sql', 'utf8'))
-    const repo = workspaceRepository(async (sql, values) => (await db.query(sql, values)).rows)
-    assert.deepEqual(await repo.read('github:1'), { lists: [], revision: 0 })
-    assert.equal((await repo.write('github:1', [list], 0)).revision, 1)
-    assert.equal(await repo.write('github:1', [], 0), null)
-    assert.deepEqual(await repo.read('github:2'), { lists: [], revision: 0 })
-    assert.equal(await repo.write('github:2', [], 1), null)
-    const results = await Promise.all([repo.write('github:1', [list], 1), repo.write('github:1', [], 1)])
+    const repo = workspaceRepository(db)
+    assert.deepEqual(await repo.read(owner), { lists: [], revision: 0 })
+    assert.equal((await repo.write(owner, [list], 0)).revision, 1)
+    assert.equal(await repo.write(owner, [], 0), null)
+    assert.deepEqual(await repo.read(other), { lists: [], revision: 0 })
+    assert.equal(await repo.write(other, [], 1), null)
+    const results = await Promise.all([repo.write(owner, [list], 1), repo.write(owner, [], 1)])
     assert.equal(results.filter(Boolean).length, 1)
-    assert.equal((await repo.read('github:1')).revision, 2)
-  } finally { await db.close() }
+    assert.equal((await repo.read(owner)).revision, 2)
+    assert.equal((await repo.write(owner, [], 2)).revision, 3)
+    assert.deepEqual(await repo.read(owner), { lists: [], revision: 3 })
+  } finally {
+    await db.workspace.deleteMany({ where: { ownerId: { in: [owner, other] } } })
+    await db.$disconnect()
+  }
 })
 
 test('migration is explicit, repeatable and preserves colliding names and records', async () => {

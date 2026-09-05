@@ -1,6 +1,6 @@
 {
   "name": "typle-r",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,10 +10,16 @@
     "test": "node --test tests/*.test.cjs",
     "typecheck": "tsc --noEmit --incremental false",
     "test:e2e": "playwright test",
-    "db:migrate": "node scripts/migrate.cjs"
+    "db:migrate": "node scripts/migrate.cjs",
+    "db:generate": "prisma generate",
+    "db:baseline": "node scripts/migrate.cjs --baseline",
+    "postinstall": "prisma generate",
+    "prebuild": "prisma generate"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
+    "@next/env": "14.2.35",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
     "next": "14.2.35",
     "next-auth": "^5.0.0-beta.32",
     "pg": "^8.23.0",
@@ -21,7 +27,6 @@
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.8",
     "@playwright/test": "^1.63.0",
     "@types/node": "^20",
     "@types/pg": "^8.23.1",
@@ -30,7 +35,11 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
     "postcss": "^8",
+    "prisma": "7.10.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0"
   }
 }
