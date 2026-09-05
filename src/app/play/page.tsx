@@ -18,9 +18,9 @@ import Chip from "@mui/material/Chip"
 
 export default function Play(){
   const [wordLists, setWordLists] = useState<WordList[]>([])
-  const [wordList, setWordList] = useState<WordList>(wordLists[0])
-  const [wordListName, setWordListName] = useState<string>(wordList && wordList.name)
-  const [displayWord, setDisplayWord] = useState<string>(wordList && wordList.words[0].display)
+  const [wordList, setWordList] = useState<WordList>()
+  const wordListName = wordList?.name ?? ""
+  const displayWord = wordList?.words[0]?.display ?? ""
   const [inputValue, setInputValue] = useState<string>("")
 
   useEffect(() => {
@@ -51,10 +51,11 @@ export default function Play(){
   ))
 
   const selectWordList = (wordListName: string) => {
-    const wordListIndex = wordLists.findIndex(wordList => wordList.name === wordListName)
-    setWordList(wordLists[wordListIndex])
-    setWordListName(wordListName)
-    setDisplayWord(wordList.words[0].display)
+    const selectedWordList = wordLists.find(wordList => wordList.name === wordListName)
+    if (!selectedWordList) return
+
+    setWordList(selectedWordList)
+    setInputValue("")
   }
 
   return (

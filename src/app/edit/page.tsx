@@ -42,8 +42,7 @@ export default function Edit(){
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      { wordList.records.map((record, index) => (
-                        <TableRow key={ index }>
+                        <TableRow>
                           <TableCell component="th" scope="row">{ wordList.name }</TableCell>
                           <TableCell>{ wordList.words.length } 単語</TableCell>
                           <TableCell>{ wordList.records.length } レコード</TableCell>
@@ -51,7 +50,6 @@ export default function Edit(){
                             <Button variant="outlined">編集</Button>
                           </TableCell>
                         </TableRow>
-                      ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
