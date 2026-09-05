@@ -15,6 +15,15 @@ export function useWordLists() {
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [identity, setIdentity] = useState(accountId)
+  // Reset before rendering a different account's view, rather than in an effect.
+  if (identity !== accountId) {
+    setIdentity(accountId)
+    setSaving(false)
+    setLists([])
+    setReady(false)
+    setError('')
+  }
   const state = useRef<State | null>(null)
   const busy = useRef(false)
   const generation = useRef(0)
@@ -36,11 +45,9 @@ export function useWordLists() {
   useEffect(() => {
     const effectGeneration = ++generation.current
     state.current = null
-    setLists([])
-    setReady(false)
-    setError('')
+    busy.current = false
     let active = true
-    if (status !== 'authenticated') { setReady(status !== 'loading'); return }
+    if (status !== 'authenticated') return
     function refresh() {
       if (busy.current) return
       load().then(() => { if (active) setError('') }).catch(reason => {
@@ -82,9 +89,10 @@ export function useWordLists() {
       window.dispatchEvent(new Event(changedEvent))
       return true
     } catch (reason) {
+      if (currentGeneration !== generation.current) return false
       setError(reason instanceof Error ? reason.message : '保存に失敗しました。もう一度お試しください。')
       return false
-    } finally { busy.current = false; setSaving(false) }
+    } finally { if (currentGeneration === generation.current) { busy.current = false; setSaving(false) } }
   }
-  return { lists, ready, error, saving, update, reload: load }
+  return { lists, ready: status === 'unauthenticated' || (status === 'authenticated' && ready), error, saving, update, reload: load }
 }

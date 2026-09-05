@@ -12,7 +12,7 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
   const [name, setName] = useState(initial?.name ?? "")
   const [words, setWords] = useState(() => (initial?.words ?? [{ display: "", input: "", annotation: "" }]).map((word, index) => ({ ...word, key: `initial-${index}` })))
 
-  const draftId = useRef<string>()
+  const draftId = useRef<string | undefined>(undefined)
   const [saving, setSaving] = useState(false)
 
   function move(index: number, offset: number) {
@@ -35,7 +35,7 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
   }} className="space-y-6">
     <TextField label="単語リスト名" required value={name} onChange={event => setName(event.target.value)} />
     <p>表示する単語と、正解として入力する文字を指定します。ログイン中のアカウントに保存されます。</p>
-    {words.map((word, index) => <fieldset key={word.key} className="border rounded p-4 space-y-4">
+    {words.map((word, index) => <fieldset key={word.key} className="border rounded-sm p-4 space-y-4">
       <legend>単語 {index + 1}</legend>
       {([['display', '表示する単語'], ['input', '入力する文字'], ['annotation', '補足']] as const).map(([field, label]) =>
         <TextField key={field} label={`${label} ${index + 1}`} required={field !== 'annotation'} value={word[field]}

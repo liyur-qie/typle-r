@@ -78,7 +78,7 @@ function Practice({ wordLists, error, update }: {
         </p>
         <label htmlFor="wordInputField">表示された文字を入力</label>
       </>}
-      <input ref={input} id="wordInputField" className={`border rounded p-4 w-full text-2xl ${finished ? "hidden" : ""}`}
+      <input ref={input} id="wordInputField" className={`border rounded-sm p-4 w-full text-2xl ${finished ? "hidden" : ""}`}
         value={composition ?? session.input} disabled={finished} autoComplete="off" autoCapitalize="off" spellCheck={false}
         aria-label="表示された文字を入力" aria-invalid={!!session.input && !word?.input.startsWith(session.input)}
         onPaste={event => event.preventDefault()} onDrop={event => event.preventDefault()}

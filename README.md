@@ -2,6 +2,14 @@
 
 自分の単語リストで練習できるタイピングアプリです。
 
+## v0.5.0 — 依存関係更新
+
+Next.js 16.3.4、React 19.2.8、Tailwind CSS 4.3.3、TypeScript 6.0.3、ESLint 9.39.5へ更新しました。Next.jsはTurbopack、Tailwindは専用PostCSSプラグイン、LintはESLint CLIのflat configを使用します。
+
+TypeScript 7とESLint 10は既存Lintプラグインの対応範囲外のため採用していません。Prismaは正式版7.10、Auth.jsは導入済みの5.0.0-beta.32を維持しています。Node型定義は実行環境に合わせ24系を使用します。
+
+Tailwind 4の対象ブラウザーはSafari 16.4以上、Chrome 111以上、Firefox 128以上です。
+
 ## v0.4.0 — Prisma
 
 Prisma 7.10のClientとMigrateで保存処理を管理します。既存の `typle_workspaces` を `Workspace` モデルに対応付け、JSONB・所有者ID・revision・DB制約を維持しています。Clientはプロセス内で再利用し、revisionの条件付き更新で同時書き込みの衝突を検出します。
@@ -95,6 +103,6 @@ GitHub ActionsのCIはユーザーの再許可まで無効化しています。�
 
 バージョンを更新し検証後、Git/SSHでコミットとタグをpush、GitHub CLIでリリースを作成します。Vercelへのデプロイは現在保留しています。`vercel.json` の `git.deploymentEnabled=false` でGit連携の自動デプロイも停止しています。再開時にこの設定を戻してください。
 
-## 依存関係の既知の制約
+## 依存関係の監査
 
-Next.jsを14.2.3から14.2.35に更新し、未使用の `style-components` を削除しました。ただし2026-09-06の `npm audit` はNext.js 14と関連依存にhigh 6件を報告しています。今回はlocalhostでの仮運用とし、公開運用の再開前にサポート中のNext.jsへの移行と監査を行ってください。
+2026-09-06の更新時点で `npm audit` の指摘は0件です。Prisma 7.10の開発ツールが固定する依存に対し、`@prisma/config` のdeepmerge-tsを8.0.2、Prisma内のmysql2を3.24.3へ限定的にoverrideしています。Prismaの生成・マイグレーション・実DBテストを確認済みです。Prisma本体が修正版を採用したらoverrideを見直してください。

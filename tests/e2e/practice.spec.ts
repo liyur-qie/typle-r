@@ -181,3 +181,14 @@ test('Tailwind editor remains accessible and fits mobile and desktop', async ({ 
     await page.screenshot({ path: `test-results/tailwind-editor-${width}.png`, fullPage: true })
   }
 })
+
+test('switching account refreshes the workspace without exposing the previous list', async ({ page, context }) => {
+  await seed(page, [{ id: 'private-switch', name: 'Previous account list', createdAt: '2026-09-06', records: [], words: [{ display: 'a', input: 'a', annotation: '' }] }])
+  await page.goto('/edit')
+  await expect(page.getByRole('button', { name: 'Previous account list を編集', exact: true })).toBeVisible()
+  const token = await encode({ token: { sub: accountId + '1', name: 'Other account' }, secret, salt: 'authjs.session-token' })
+  await context.addCookies([{ name: 'authjs.session-token', value: token, url: origin }])
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  await expect(page.getByText('Other account としてログイン中', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Previous account list を編集', exact: true })).toHaveCount(0)
+})
