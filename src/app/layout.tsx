@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ja">
-      <body className="bg-neutral-100 font-sans text-slate-900">
+    <html lang="ja" className="font-sans">
+      <body className="bg-muted/40 font-sans text-foreground antialiased">
       <AuthProvider>
       <div className="min-h-screen lg:flex">
       <Sidebar />

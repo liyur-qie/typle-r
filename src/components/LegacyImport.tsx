@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import Button from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { decodeLists, STORAGE_KEY, SavedWordList } from '@/lib/wordLists'
 import { mergeLegacy, prepareLegacy } from '@/lib/importLegacy'
 
@@ -16,7 +16,7 @@ export default function LegacyImport({ update, disabled }: {
   return <section className="mt-8 space-y-3" aria-label="以前のデータを移行">
     <h2 className="text-xl">以前のデータを移行</h2>
     <p>このブラウザーに残るv0.1.xの単語リストと記録を、{session.user.name ?? '現在のアカウント'} に追加します。元のデータは残ります。同じデータを再度移行しても重複しません。</p>
-    <Button disabled={disabled || busy} variant="outlined" onClick={async () => {
+    <Button disabled={disabled || busy} variant="outline" onClick={async () => {
       setBusy(true)
       setMessage('')
       try {

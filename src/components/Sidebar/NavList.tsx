@@ -1,4 +1,5 @@
 "use client"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -13,12 +14,11 @@ const routes = [
 
 export default function NavList() {
   const pathname = usePathname()
-  return <nav aria-label="メインナビゲーション"><ul className="grid grid-cols-3 lg:block">
+  return <nav aria-label="メインナビゲーション"><ul className="grid grid-cols-3 gap-1 p-3 lg:grid-cols-1">
     {routes.map(route => <li key={route.path}>
-      <Link href={route.path} aria-current={pathname === route.path ? 'page' : undefined}
-        className={`block border-b-2 px-4 py-4 text-sm transition-colors hover:bg-pink-50 hover:text-pink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-pink-700 lg:px-6 lg:py-5 ${pathname === route.path ? 'border-pink-600 bg-pink-50 text-pink-700' : 'border-transparent'}`}>
-        {route.name}
-      </Link>
+      <Button asChild variant={pathname === route.path ? 'secondary' : 'ghost'} className="w-full lg:justify-start">
+        <Link href={route.path} aria-current={pathname === route.path ? 'page' : undefined}>{route.name}</Link>
+      </Button>
     </li>)}
   </ul></nav>
 }

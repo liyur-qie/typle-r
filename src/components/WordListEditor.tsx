@@ -1,6 +1,6 @@
 "use client"
 import { useRef, useState } from "react"
-import Button from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import TextField from "@/components/ui/TextField"
 import type { SavedWordList } from "@/lib/wordLists"
 
@@ -48,7 +48,7 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
     </fieldset>)}
     <Button onClick={() => setWords(current => [...current, { key: crypto.randomUUID(), display: "", input: "", annotation: "" }])}>単語を追加</Button>
     <div className="flex gap-3">
-      <Button type="submit" disabled={saving} variant="contained">{saving ? "保存中…" : "保存"}</Button>
+      <Button type="submit" disabled={saving} variant="default">{saving ? "保存中…" : "保存"}</Button>
       <Button onClick={onCancel}>キャンセル</Button>
     </div>
   </form>

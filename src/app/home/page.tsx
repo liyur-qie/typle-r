@@ -1,5 +1,8 @@
 "use client"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import LegacyImport from "@/components/LegacyImport"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
@@ -11,12 +14,12 @@ export default function Home() {
   return <Page><PageContainer>
     <h1 className="text-3xl mb-4">自分の単語で、タイピング練習。</h1>
     <p className="mb-6">サンプルで練習を始めるか、覚えたい単語のリストを作成しましょう。</p>
-    {error && <p role="alert" className="text-red-700">{error}</p>}
-    {ready && <p className="mb-6">単語リスト {lists.length} 件 ／ 完了した練習 {count} 回</p>}
+    {error && <Alert variant="destructive" className="my-4"><AlertDescription>{error}</AlertDescription></Alert>}
+    {ready && <div className="flex flex-wrap gap-3 mb-6"><Badge variant="secondary">単語リスト {lists.length} 件</Badge><Badge variant="secondary">完了した練習 {count} 回</Badge></div>}
     <nav aria-label="はじめる" className="flex gap-4 flex-wrap">
-      <Link href="/play" className="bg-blue-700 text-white rounded-sm px-5 py-3">練習する</Link>
-      <Link href="/create" className="border rounded-sm px-5 py-3">リストを作成</Link>
-      <Link href="/records" className="border rounded-sm px-5 py-3">記録を見る</Link>
+      <Button asChild><Link href="/play">練習する</Link></Button>
+      <Button asChild variant="outline"><Link href="/create">リストを作成</Link></Button>
+      <Button asChild variant="outline"><Link href="/records">記録を見る</Link></Button>
     </nav>
     <p className="mt-8">GitHubでログインすると、単語リストと練習記録をアカウントごとに保存できます。同じアカウントで別の端末から利用できます。</p>
     <LegacyImport update={update} disabled={!ready || saving} />

@@ -1,6 +1,6 @@
 "use client"
 import { signIn, signOut, useSession } from 'next-auth/react'
-import Button from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 export default function AccountBar() {
   const { data: session, status } = useSession()
@@ -8,6 +8,6 @@ export default function AccountBar() {
     {status === 'loading' ? <span>ログイン状態を確認中…</span> : session?.user ? <>
       <span>{session.user.name ?? 'GitHubユーザー'} としてログイン中</span>
       <Button onClick={() => signOut({ callbackUrl: '/home' })}>ログアウト</Button>
-    </> : <Button variant="outlined" onClick={() => signIn('github')}>GitHubでログイン</Button>}
+    </> : <Button variant="outline" onClick={() => signIn('github')}>GitHubでログイン</Button>}
   </div>
 }

@@ -1,6 +1,10 @@
 "use client"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
-import Button from "@/components/ui/Button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { useWordLists } from "@/lib/useWordLists"
 import type { SavedWordList } from "@/lib/wordLists"
 import { usePractice } from "@/lib/usePractice"
@@ -23,9 +27,9 @@ function Practice({ wordLists, error, update }: {
 
   return <Page className="pb-12"><PageContainer>
     <h1 className="text-2xl mb-6">タイピング練習</h1>
-    {error && <p role="alert" className="text-red-700 mb-4">{error}</p>}
+    {error && <Alert variant="destructive" className="my-4"><AlertDescription>{error}</AlertDescription></Alert>}
     <div className="flex gap-3 flex-wrap mb-6" aria-label="単語リスト">
-      {wordLists.map((item, index) => <Button key={item.id} variant={index === selected ? "contained" : "outlined"}
+      {wordLists.map((item, index) => <Button key={item.id} variant={index === selected ? "default" : "outline"}
         aria-pressed={index === selected} onClick={() => restart(index)}>{item.name}</Button>)}
     </div>
     <h2 className="text-xl">選択中: {list?.name ?? "リストなし"}</h2>
@@ -40,9 +44,9 @@ function Practice({ wordLists, error, update }: {
             return <span key={index} className={typed === undefined ? "" : typed === char ? "text-green-700 underline" : "text-red-700 underline"}>{char}</span>
           })}
         </p>
-        <label htmlFor="wordInputField">表示された文字を入力</label>
+        <Label htmlFor="wordInputField">表示された文字を入力</Label>
       </>}
-      <input ref={input} id="wordInputField" className={`border rounded-sm p-4 w-full text-2xl ${finished ? "hidden" : ""}`}
+      <Input ref={input} id="wordInputField" className={`border rounded-sm p-4 w-full text-2xl ${finished ? "hidden" : ""}`}
         value={composition ?? session.input} disabled={finished} autoComplete="off" autoCapitalize="off" spellCheck={false}
         aria-label="表示された文字を入力" aria-invalid={!!session.input && !word?.input.startsWith(session.input)}
         onPaste={event => event.preventDefault()} onDrop={event => event.preventDefault()}
@@ -50,15 +54,15 @@ function Practice({ wordLists, error, update }: {
         onCompositionEnd={event => endComposition(event.currentTarget.value)}
         onChange={event => changeInput(event.target.value, (event.nativeEvent as InputEvent).isComposing)} />
       {!finished && session.input && !word?.input.startsWith(session.input) && <p role="status" className="text-red-700">入力が違います。Backspaceで修正してください。</p>}
-      {finished && <section aria-label="練習結果" className="my-6 p-6 bg-green-50">
+      {finished && <Card aria-label="練習結果" className="my-6"><CardContent className="space-y-2">
         <h2 className="text-xl">おつかれさまでした！</h2>
         <p>{list.words.length} 単語を完了しました。</p>
         <p>所要時間: {result.time.toFixed(2)} 秒</p>
         <p>ミス数: {result.mistakes} 文字 ／ 正確率: {result.accuracy}%</p>
         <p role="status">{saved ? "練習記録を保存しました。" : "記録はまだ保存されていません。"}</p>
         {!saved && <Button onClick={retrySave}>記録の保存を再試行</Button>}
-      </section>}
-      <div className="my-6"><Button variant="outlined" onClick={() => restart()}>最初からやり直す</Button></div>
+      </CardContent></Card>}
+      <div className="my-6"><Button variant="outline" onClick={() => restart()}>最初からやり直す</Button></div>
     </>}
   </PageContainer></Page>
 }
