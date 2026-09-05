@@ -1,6 +1,8 @@
 "use client"
 import { useRef, useState } from "react"
+import { ArrowUp, ArrowDown, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import TextField from "@/components/ui/TextField"
 import type { SavedWordList } from "@/lib/wordLists"
 
@@ -14,6 +16,8 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
 
   const draftId = useRef<string | undefined>(undefined)
   const [saving, setSaving] = useState(false)
+  const [expandedAnnotations, setExpandedAnnotations] = useState<Set<string>>(() => new Set())
+  const [expandedInputs, setExpandedInputs] = useState<Set<string>>(() => new Set())
 
   function move(index: number, offset: number) {
     setWords(current => {
@@ -30,22 +34,67 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
     if (saving) return
     draftId.current ??= initial?.id ?? crypto.randomUUID()
     setSaving(true)
-    try { await onSave({ id: draftId.current, name, words: words.map(({ key, ...word }) => word),
+    try { await onSave({ id: draftId.current, name, words: words.map(({ key, ...word }) => ({ ...word, input: word.input || word.display })),
       records: initial?.records ?? [], createdAt: initial?.createdAt ?? new Date().toISOString() }) } finally { setSaving(false) }
   }} className="space-y-6">
     <TextField label="単語リスト名" required value={name} onChange={event => setName(event.target.value)} />
     <p>表示する単語と、正解として入力する文字を指定します。ログイン中のアカウントに保存されます。</p>
-    {words.map((word, index) => <fieldset key={word.key} className="border rounded-sm p-4 space-y-4">
-      <legend>単語 {index + 1}</legend>
-      {([['display', '表示する単語'], ['input', '入力する文字'], ['annotation', '補足']] as const).map(([field, label]) =>
-        <TextField key={field} label={`${label} ${index + 1}`} required={field !== 'annotation'} value={word[field]}
-          onChange={event => setWords(current => current.map(item => item.key === word.key ? { ...item, [field]: event.target.value } : item))} />)}
-      <div className="flex flex-wrap gap-2">
-        <Button disabled={index === 0} onClick={() => move(index, -1)} aria-label={`単語 ${index + 1} を上へ`}>上へ</Button>
-        <Button disabled={index === words.length - 1} onClick={() => move(index, 1)} aria-label={`単語 ${index + 1} を下へ`}>下へ</Button>
-        <Button disabled={words.length === 1} onClick={() => setWords(current => current.filter(item => item.key !== word.key))} aria-label={`単語 ${index + 1} を削除`}>削除</Button>
+    <Table aria-label="単語の追加・編集" className="block w-full md:table md:table-fixed">
+      <TableHeader className="sr-only md:not-sr-only md:table-header-group"><TableRow>
+        <TableHead scope="col" className="w-12">順番</TableHead>
+        <TableHead scope="col">単語</TableHead>
+        <TableHead scope="col">入力・補足</TableHead>
+        <TableHead scope="col" className="w-28">操作</TableHead>
+      </TableRow></TableHeader>
+      <TableBody className="block md:table-row-group">
+    {words.map((word, index) => <TableRow key={word.key} className="grid grid-cols-[2rem_minmax(0,1fr)] items-start py-2 md:table-row md:py-0 align-top">
+      <TableHead scope="row" className="pt-4">{index + 1}</TableHead>
+      <TableCell className="min-w-0 whitespace-normal">
+      <TextField label={`表示する単語 ${index + 1}`} hideLabel placeholder="単語を入力" required value={word.display}
+        onChange={event => setWords(current => current.map(item => item.key === word.key ? {
+          ...item, display: event.target.value,
+          input: item.input === item.display ? event.target.value : item.input,
+        } : item))} />
+      </TableCell>
+      <TableCell className="col-start-2 min-w-0 whitespace-normal break-words space-y-3">
+      <div role="group" aria-label={`単語 ${index + 1} の入力・補足設定`}
+        className="inline-flex [&>button]:relative [&>button]:rounded-none [&>button:first-child]:rounded-l-lg [&>button:last-child]:rounded-r-lg [&>button+button]:-ml-px [&>button:focus-visible]:z-10">
+      <Button variant="outline" aria-expanded={expandedInputs.has(word.key)}
+        aria-controls={`input-${word.key}`} onClick={() => setExpandedInputs(current => {
+          const next = new Set(current)
+          if (next.has(word.key)) next.delete(word.key)
+          else next.add(word.key)
+          return next
+        })}>入力</Button>
+      <Button variant="outline" aria-expanded={expandedAnnotations.has(word.key)}
+        aria-controls={`annotation-${word.key}`} onClick={() => setExpandedAnnotations(current => {
+          const next = new Set(current)
+          if (next.has(word.key)) next.delete(word.key)
+          else next.add(word.key)
+          return next
+        })}>補足</Button>
       </div>
-    </fieldset>)}
+      <div id={`input-${word.key}`} hidden={!expandedInputs.has(word.key)}>
+        <TextField label={`入力する文字 ${index + 1}`} hideLabel value={word.input} placeholder={word.display || '入力する文字'}
+          onChange={event => setWords(current => current.map(item => item.key === word.key ? { ...item, input: event.target.value } : item))} />
+        <p className="mt-2 text-sm text-muted-foreground">空欄の場合は表示する単語と同じ文字を使います。</p>
+      </div>
+      <div id={`annotation-${word.key}`} hidden={!expandedAnnotations.has(word.key)}>
+        <TextField label={`補足 ${index + 1}`} hideLabel placeholder="補足を入力" value={word.annotation}
+          onChange={event => setWords(current => current.map(item => item.key === word.key ? { ...item, annotation: event.target.value } : item))} />
+      </div>
+      </TableCell>
+      <TableCell className="col-start-2 min-w-0">
+      <div role="group" aria-label={`単語 ${index + 1} の操作`}
+        className="inline-flex [&>button]:relative [&>button]:rounded-none [&>button:first-child]:rounded-l-lg [&>button:last-child]:rounded-r-lg [&>button+button]:-ml-px [&>button:focus-visible]:z-10">
+        <Button size="icon" variant="outline" disabled={index === 0} onClick={() => move(index, -1)} aria-label={`単語 ${index + 1} を上へ`} title="上へ"><ArrowUp aria-hidden="true" /></Button>
+        <Button size="icon" variant="outline" disabled={index === words.length - 1} onClick={() => move(index, 1)} aria-label={`単語 ${index + 1} を下へ`} title="下へ"><ArrowDown aria-hidden="true" /></Button>
+        <Button size="icon" variant="outline" className="text-destructive hover:text-destructive" disabled={words.length === 1} onClick={() => setWords(current => current.filter(item => item.key !== word.key))} aria-label={`単語 ${index + 1} を削除`} title="削除"><Trash2 aria-hidden="true" /></Button>
+      </div>
+      </TableCell>
+    </TableRow>)}
+      </TableBody>
+    </Table>
     <Button onClick={() => setWords(current => [...current, { key: crypto.randomUUID(), display: "", input: "", annotation: "" }])}>単語を追加</Button>
     <div className="flex gap-3">
       <Button type="submit" disabled={saving} variant="default">{saving ? "保存中…" : "保存"}</Button>
