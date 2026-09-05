@@ -73,7 +73,7 @@ npm run test:e2e
 
 単体テストは入力判定、記録、移行、形式検証とPGlite上のPostgreSQLクエリを検証します。E2Eは本番ビルドをポート3101で起動し、実PostgreSQLとAPIを通して作成・編集・練習・再読み込み・削除、アカウント分離、401/403/409応答を確認します。テスト専用秘密値で署名したセッションを使うため、GitHub OAuth画面の実ログインは別途確認が必要です。テストユーザーの行だけを終了後に削除します。
 
-GitHub ActionsでもPostgreSQLサービスを起動して同じチェックを実行します。開発ビルド `.next` と本番ビルド `.next-production` は分離しています。
+GitHub ActionsのCIはユーザーの再許可まで無効化しています。検証はローカルで実行します。再許可後は `gh workflow enable ci.yml` で再開できます。開発ビルド `.next` と本番ビルド `.next-production` は分離しています。
 
 ## リリース
 
