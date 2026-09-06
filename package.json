@@ -1,6 +1,6 @@
 {
   "name": "typle-r",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit --incremental false",
     "test:e2e": "playwright test",
     "db:migrate": "node scripts/migrate.cjs",
+    "db:seed": "node scripts/seed.cjs",
     "db:generate": "prisma generate",
     "db:baseline": "node scripts/migrate.cjs --baseline",
     "postinstall": "prisma generate",

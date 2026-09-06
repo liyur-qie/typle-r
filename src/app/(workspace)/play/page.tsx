@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useWordLists } from "@/lib/useWordLists"
 import type { SavedWordList } from "@/lib/wordLists"
 import { usePractice } from "@/lib/usePractice"
+import BestRecordsTable from "@/components/BestRecordsTable"
 import type { WorkspaceUpdate } from "@/lib/workspaceClient"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
@@ -26,16 +27,20 @@ function Practice({ wordLists, error, update }: {
 }) {
   const { list, selected, session, composition, startComposition, endComposition, changeInput, saved, input, word, finished, result, restart, retrySave } = usePractice(wordLists, update)
   const typedCharacters = Array.from(composition ?? session.input)
+  const selectedRecords = wordLists.find(item => item.id === list?.id)?.records ?? []
 
   return <Page className="pb-12"><PageContainer className={finished ? undefined : "pt-0 sm:pt-0 lg:pt-0"}>
     {error && <Alert variant="destructive" className="my-4"><AlertDescription>{error}</AlertDescription></Alert>}
     {!list?.words.length ? <p>単語がありません。単語リストを作成してください。</p> : <>
       {!finished && <>
-        <div id="wordDisplay" className="-mx-5 sm:-mx-8 lg:-mx-16 bg-gray-900 text-white h-28 px-8 text-4xl leading-none text-center whitespace-nowrap overflow-x-auto flex items-center justify-center">
+        <div className="relative -mx-5 sm:-mx-8 lg:-mx-16">
+        {word?.annotation && <p className="absolute inset-x-4 top-2 z-10 text-base text-center text-white break-words">{word.annotation}</p>}
+        <div id="wordDisplay" className="bg-gray-900 text-white h-28 px-8 text-4xl leading-none text-center whitespace-nowrap overflow-x-auto flex items-center justify-center">
           {Array.from(word?.display ?? "").map((char, index) => {
             const typed = typedCharacters[index]
             return <span key={index} className={typed === undefined ? "" : typed === char ? "text-green-400 underline" : "text-red-400 underline"}>{char}</span>
           })}
+        </div>
         </div>
       </>}
       <div className="-mx-5 sm:-mx-8 lg:-mx-16">
@@ -62,7 +67,6 @@ function Practice({ wordLists, error, update }: {
       </ul>}
       {finished ? <h1 className="text-2xl mb-6">練習完了：{list.name}</h1>
         : <p className="my-4" role="status">{`${session.index + 1} / ${list.words.length} 単語`}</p>}
-      {!finished && word?.annotation && <p className="mt-3">{word.annotation}</p>}
       {finished && <Card aria-label="練習結果" className="my-6"><CardContent className="space-y-2">
         <h2 className="text-xl">おつかれさまでした！</h2>
         <Table aria-label="練習結果の詳細">
@@ -77,6 +81,13 @@ function Practice({ wordLists, error, update }: {
         {!saved && <Button onClick={retrySave}>記録の保存を再試行</Button>}
       </CardContent></Card>}
     </>}
+    <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+    <section className="min-w-0" aria-label="選択中リストのベスト記録">
+      <h2 className="mb-3 text-xl">ベスト記録</h2>
+      <BestRecordsTable records={selectedRecords} label="ベスト記録 上位5件" />
+    </section>
+    <section className="min-w-0" aria-label="単語リストの選択">
+    <h2 className="mb-3 text-xl">単語リスト</h2>
     <Table aria-label="単語リスト">
       <TableHeader><TableRow><TableHead scope="col">単語リスト名</TableHead><TableHead scope="col" className="w-24 text-right">選択</TableHead></TableRow></TableHeader>
       <TableBody>
@@ -84,10 +95,12 @@ function Practice({ wordLists, error, update }: {
           <TableHead scope="row" className="whitespace-normal break-all">{item.name}</TableHead>
           <TableCell className="text-right">
             <Button variant={index === selected ? "default" : "outline"}
-              aria-label={`${item.name} を選択`} aria-pressed={index === selected} onClick={() => restart(index)}>選択</Button>
+              aria-label={`${item.name} ${index === selected ? 'を選択中' : 'を選択'}`} aria-pressed={index === selected} onClick={() => restart(index)}>{index === selected ? '選択中' : '選択'}</Button>
           </TableCell>
         </TableRow>)}
       </TableBody>
     </Table>
+    </section>
+    </div>
   </PageContainer></Page>
 }

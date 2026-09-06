@@ -2,6 +2,7 @@
 import { useRef, useState } from "react"
 import { ArrowUp, ArrowDown, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import TextField from "@/components/ui/TextField"
 import type { SavedWordList } from "@/lib/wordLists"
@@ -57,8 +58,7 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
         } : item))} />
       </TableCell>
       <TableCell className="col-start-2 min-w-0 whitespace-normal break-words space-y-3">
-      <div role="group" aria-label={`単語 ${index + 1} の入力・補足設定`}
-        className="inline-flex [&>button]:relative [&>button]:rounded-none [&>button:first-child]:rounded-l-lg [&>button:last-child]:rounded-r-lg [&>button+button]:-ml-px [&>button:focus-visible]:z-10">
+      <ButtonGroup aria-label={`単語 ${index + 1} の入力・補足設定`}>
       <Button variant="outline" aria-expanded={expandedInputs.has(word.key)}
         aria-controls={`input-${word.key}`} onClick={() => setExpandedInputs(current => {
           const next = new Set(current)
@@ -73,7 +73,7 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
           else next.add(word.key)
           return next
         })}>補足</Button>
-      </div>
+      </ButtonGroup>
       <div id={`input-${word.key}`} hidden={!expandedInputs.has(word.key)}>
         <TextField label={`入力する文字 ${index + 1}`} hideLabel value={word.input} placeholder={word.display || '入力する文字'}
           onChange={event => setWords(current => current.map(item => item.key === word.key ? { ...item, input: event.target.value } : item))} />
@@ -85,12 +85,11 @@ export default function WordListEditor({ initial, onSave, onCancel }: {
       </div>
       </TableCell>
       <TableCell className="col-start-2 min-w-0">
-      <div role="group" aria-label={`単語 ${index + 1} の操作`}
-        className="inline-flex [&>button]:relative [&>button]:rounded-none [&>button:first-child]:rounded-l-lg [&>button:last-child]:rounded-r-lg [&>button+button]:-ml-px [&>button:focus-visible]:z-10">
+      <ButtonGroup aria-label={`単語 ${index + 1} の操作`}>
         <Button size="icon" variant="outline" disabled={index === 0} onClick={() => move(index, -1)} aria-label={`単語 ${index + 1} を上へ`} title="上へ"><ArrowUp aria-hidden="true" /></Button>
         <Button size="icon" variant="outline" disabled={index === words.length - 1} onClick={() => move(index, 1)} aria-label={`単語 ${index + 1} を下へ`} title="下へ"><ArrowDown aria-hidden="true" /></Button>
         <Button size="icon" variant="outline" className="text-destructive hover:text-destructive" disabled={words.length === 1} onClick={() => setWords(current => current.filter(item => item.key !== word.key))} aria-label={`単語 ${index + 1} を削除`} title="削除"><Trash2 aria-hidden="true" /></Button>
-      </div>
+      </ButtonGroup>
       </TableCell>
     </TableRow>)}
       </TableBody>
