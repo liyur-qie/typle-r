@@ -8,20 +8,20 @@ import { Button } from "@/components/ui/button"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
 import WordListEditor from "@/components/WordListEditor"
+import { useSaveNotification } from "@/components/SaveNotification"
 import { useWordLists } from "@/lib/useWordLists"
 import { SavedWordList, saveList } from "@/lib/wordLists"
 
 export default function Edit() {
+  const notify = useSaveNotification()
   const { lists, ready, error, update } = useWordLists()
   const [editing, setEditing] = useState<SavedWordList | null>(null)
-  const [message, setMessage] = useState('')
   return <Page><PageContainer>
     <h1 className="text-2xl mb-6">単語リストの編集</h1>
     {error && <Alert variant="destructive" className="my-4"><AlertDescription>{error}</AlertDescription></Alert>}
-    {message && <p role="status">{message}</p>}
     {!ready ? <p>読み込み中…</p> : editing ? <WordListEditor key={editing.id} initial={editing} onCancel={() => setEditing(null)} onSave={async list => {
       const saved = await update(current => saveList(current, list, true))
-      if (saved) { setEditing(null); setMessage('保存しました。') }
+      if (saved) { setEditing(null); notify(`「${list.name}」を更新しました。`) }
       return saved
     }} /> : <>
       <Link href="/create" className="underline">新しい単語リストを作成</Link>
@@ -29,11 +29,11 @@ export default function Edit() {
       <div className="overflow-x-auto my-6"><Table className="w-full text-left">
         <TableHeader><TableRow><TableHead className="p-3">単語リスト名</TableHead><TableHead>単語数</TableHead><TableHead>記録数</TableHead><TableHead>操作</TableHead></TableRow></TableHeader>
         <TableBody>{lists.map(list => <TableRow key={list.id} className="border-t">
-          <TableCell className="p-3 font-medium">{list.name}</TableCell><TableCell>{list.words.length}</TableCell><TableCell>{list.records.length}</TableCell>
-          <TableCell><Button onClick={() => { setEditing(list); setMessage('') }} aria-label={`${list.name} を編集`}>編集</Button>
+          <TableCell className="p-3 font-medium">{list.name}</TableCell><TableCell>{list.words.length}単語</TableCell><TableCell>{list.records.length}記録</TableCell>
+          <TableCell><Button onClick={() => setEditing(list)} aria-label={`${list.name} を編集`}>編集</Button>
             <DeleteConfirmation label={`${list.name} を削除`} description={`「${list.name}」とその練習記録を削除します。`} onConfirm={async () => {
               const saved = await update(current => current.filter(item => item.id !== list.id))
-              if (saved) setMessage('削除しました。')
+              if (saved) notify(`「${list.name}」を削除しました。`)
               return saved
             }} /></TableCell>
         </TableRow>)}</TableBody>

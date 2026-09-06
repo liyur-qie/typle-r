@@ -24,7 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="bg-muted/40 font-sans text-foreground antialiased">
       <AuthProvider>
       <Navbar />
-      <div className="min-h-screen lg:flex">
+      <div className="min-h-screen flex">
       <Sidebar />
       <div className="min-w-0 flex-1">
         { children }

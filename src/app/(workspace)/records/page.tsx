@@ -2,6 +2,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import DeleteConfirmation from "@/components/DeleteConfirmation"
+import { useSaveNotification } from "@/components/SaveNotification"
 import Link from "next/link"
 import Page from "@/components/Page/Page"
 import PageContainer from "@/components/PageContainer/PageContainer"
@@ -10,6 +11,7 @@ import { useWordLists } from "@/lib/useWordLists"
 import { recentRecords, removeRecord } from "@/lib/records"
 
 export default function Records() {
+  const notify = useSaveNotification()
   const { lists, ready, error, update } = useWordLists()
   const rows = recentRecords(lists)
   return <Page><PageContainer>
@@ -25,7 +27,11 @@ export default function Records() {
           <TableCell>{new Date(record.date).toLocaleString('ja-JP')}</TableCell>
           <TableCell><DeleteConfirmation label={`${list.name} の ${new Date(record.date).toLocaleString('ja-JP')} の記録を削除`}
             description={`${list.name} の ${new Date(record.date).toLocaleString('ja-JP')} の練習記録を削除します。`}
-            onConfirm={() => update(current => removeRecord(current, list.id, record))} /></TableCell>
+            onConfirm={async () => {
+              const saved = await update(current => removeRecord(current, list.id, record))
+              if (saved) notify(`「${list.name}」の ${new Date(record.date).toLocaleString('ja-JP')} の練習記録を削除しました。`)
+              return saved
+            }} /></TableCell>
         </TableRow>)}</TableBody>
       </Table></div>}
   </PageContainer></Page>
